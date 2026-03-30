@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sovereign Mind System</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1410;
+    --parchment: #f5f0e8;
+    --warm-mid: #ede4cf;
+    --accent: #8b4513;
+    --accent-light: #c4845a;
+    --accent-faint: rgba(139,69,19,0.07);
+    --muted: #8a7a6a;
+    --border: #d4c8b0;
+    --ok: #4a7c59;
+    --ok-dim: rgba(74,124,89,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--parchment); color: var(--ink); font-family: 'Cormorant Garamond', Georgia, serif; min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse at 15% 15%, rgba(139,69,19,0.05) 0%, transparent 55%), radial-gradient(ellipse at 85% 85%, rgba(139,69,19,0.04) 0%, transparent 55%); pointer-events: none; z-index: 0; }
+
+  /* NAV */
+  .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 16px 48px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: rgba(245,240,232,0.92); backdrop-filter: blur(8px); }
+  .nav-brand { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); }
+  .nav-links { display: flex; gap: 28px; }
+  .nav-links a { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--ink); }
+
+  /* HERO */
+  .hero { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 140px 48px 80px; }
+  .hero-eyebrow { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); margin-bottom: 28px; display: flex; align-items: center; gap: 14px; }
+  .hero-eyebrow::before { content: ''; width: 24px; height: 1px; background: var(--accent); opacity: 0.6; }
+  .hero h1 { font-size: clamp(3rem, 7vw, 5.5rem); font-weight: 300; line-height: 1.0; letter-spacing: -0.02em; margin-bottom: 32px; }
+  .hero h1 em { font-style: italic; color: var(--accent); display: block; }
+  .hero-sub { font-size: 1.2rem; font-weight: 300; color: var(--muted); line-height: 1.75; max-width: 560px; margin-bottom: 48px; }
+  .hero-rule { width: 100%; height: 1px; background: linear-gradient(90deg, var(--border), transparent); margin-bottom: 48px; }
+  .hero-premise { font-size: 1.4rem; font-weight: 300; font-style: italic; line-height: 1.6; max-width: 600px; color: var(--ink); padding-left: 24px; border-left: 2px solid var(--accent); opacity: 0.8; }
+
+  /* WHAT */
+  .section { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 80px 48px; }
+  .section-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); margin-bottom: 32px; display: flex; align-items: center; gap: 14px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .what-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 2px; overflow: hidden; margin-bottom: 48px; }
+  .what-cell { background: var(--parchment); padding: 28px 24px; }
+  .what-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 12px; display: block; }
+  .what-title { font-size: 1.15rem; font-weight: 400; margin-bottom: 8px; line-height: 1.3; }
+  .what-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.7; font-style: italic; }
+  .what-outcome { background: rgba(255,255,255,0.5); border: 1px solid var(--border); border-radius: 2px; padding: 24px 28px; font-size: 1rem; line-height: 1.75; color: var(--ink); font-style: italic; }
+  .what-outcome strong { font-style: normal; color: var(--accent); font-weight: 400; }
+
+  /* DIVIDER */
+  .full-divider { position: relative; z-index: 1; height: 1px; background: var(--border); margin: 0 48px; }
+
+  /* LAYERS */
+  .layers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 48px; }
+  .layer-card { background: rgba(255,255,255,0.45); border: 1px solid var(--border); border-radius: 2px; padding: 24px 26px; text-decoration: none; color: inherit; display: block; transition: all 0.2s; position: relative; overflow: hidden; }
+  .layer-card::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 2px; background: var(--border); transition: background 0.2s; }
+  .layer-card:hover { background: rgba(255,255,255,0.75); border-color: var(--accent-light); transform: translateY(-2px); box-shadow: 0 4px 20px rgba(139,69,19,0.08); }
+  .layer-card:hover::before { background: var(--accent); }
+  .layer-card.done::before { background: var(--ok); opacity: 0.5; }
+  .lc-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+  .lc-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.12em; }
+  .lc-time { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+  .lc-title { font-size: 1.15rem; font-weight: 400; margin-bottom: 6px; }
+  .lc-output { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ok); letter-spacing: 0.08em; margin-bottom: 8px; }
+  .lc-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.65; font-style: italic; }
+  .layer-card.utility { border-style: dashed; }
+  .layer-card.utility:hover { border-style: dashed; }
+
+  /* TRACKS */
+  .tracks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 40px; }
+  .track-card { border-radius: 2px; padding: 28px 26px; position: relative; overflow: hidden; }
+  .track-card.html-track { background: var(--ok-dim); border: 1px solid rgba(74,124,89,0.2); }
+  .track-card.claude-track { background: var(--accent-faint); border: 1px solid rgba(139,69,19,0.15); }
+  .track-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 10px; }
+  .html-track .track-label { color: var(--ok); }
+  .claude-track .track-label { color: var(--accent); }
+  .track-title { font-size: 1.2rem; font-weight: 400; margin-bottom: 10px; }
+  .track-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.7; margin-bottom: 16px; font-style: italic; }
+  .track-link { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: gap 0.2s; }
+  .html-track .track-link { color: var(--ok); }
+  .claude-track .track-link { color: var(--accent); }
+  .track-link:hover { gap: 12px; }
+
+  /* HOW TO USE */
+  .use-steps { counter-reset: steps; }
+  .use-step { display: flex; gap: 24px; padding: 24px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+  .use-step:last-child { border-bottom: none; }
+  .us-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); flex-shrink: 0; width: 32px; margin-top: 3px; opacity: 0.7; }
+  .us-body {}
+  .us-title { font-size: 1.05rem; font-weight: 400; margin-bottom: 4px; }
+  .us-desc { font-size: 0.9rem; color: var(--muted); line-height: 1.7; }
+  .us-desc code { font-family: 'DM Mono', monospace; font-size: 0.82em; background: rgba(139,69,19,0.08); color: var(--accent); padding: 2px 6px; border-radius: 2px; }
+
+  /* FOOTER */
+  .footer { position: relative; z-index: 1; border-top: 1px solid var(--border); padding: 40px 48px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  .footer-brand { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+  .footer-note { font-size: 0.85rem; color: var(--muted); font-style: italic; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .animate { animation: fadeUp 0.8s ease both; }
+
+  @media (max-width: 700px) {
+    .nav { padding: 14px 24px; }
+    .nav-links { display: none; }
+    .hero { padding: 100px 24px 60px; }
+    .section { padding: 56px 24px; }
+    .full-divider { margin: 0 24px; }
+    .what-grid { grid-template-columns: 1fr; }
+    .layers-grid { grid-template-columns: 1fr; }
+    .tracks-grid { grid-template-columns: 1fr; }
+    .footer { padding: 28px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nav-brand">Sovereign Mind System</span>
+  <div class="nav-links">
+    <a href="#layers">Layers</a>
+    <a href="#tracks">Tracks</a>
+    <a href="#how">How to Use</a>
+    <a href="claude-way/index.html">Claude Way</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero animate">
+  <div class="hero-eyebrow">A framework for solopreneurs</div>
+  <h1>Your thinking,<br><em>inside the machine.</em></h1>
+  <p class="hero-sub">Three skill files. Five layers. One system that makes any AI work from your actual philosophy, your actual voice, and your actual methods — not a generic starting point.</p>
+  <div class="hero-rule"></div>
+  <p class="hero-premise">"Most people use AI as a faster typist. This turns it into a collaborator that thinks like you."</p>
+</div>
+
+<div class="full-divider"></div>
+
+<!-- WHAT YOU BUILD -->
+<div class="section" id="layers">
+  <div class="section-label">What you build</div>
+  <div class="what-grid">
+    <div class="what-cell">
+      <span class="what-num">File 01</span>
+      <div class="what-title">worldview.md</div>
+      <div class="what-desc">Your philosophy. What you believe, what you stand for, what you won't do. The root of the system — everything else answers to this.</div>
+    </div>
+    <div class="what-cell">
+      <span class="what-num">File 02</span>
+      <div class="what-title">brand.md</div>
+      <div class="what-desc">Your identity. How your beliefs show up commercially — your voice, your values in action, your position, your non-negotiables.</div>
+    </div>
+    <div class="what-cell">
+      <span class="what-num">File 03</span>
+      <div class="what-title">execution.md</div>
+      <div class="what-desc">Your methodology. The real process, the conditions that produce your best work, the principle that makes your output distinctly yours.</div>
+    </div>
+  </div>
+  <div class="what-outcome">
+    After Layer 3, you have a working system. Paste all three files at the top of any AI conversation and it works from your foundation — not a blank slate.<br><br>
+    Layers 4 and 5 deepen it: <strong>coherence checking</strong> across the three files, and a <strong>routing OS</strong> (system.md) that tells your AI exactly which file to consult depending on the task.
+  </div>
+</div>
+
+<div class="full-divider"></div>
+
+<!-- LAYERS -->
+<div class="section">
+  <div class="section-label">The five layers</div>
+  <div class="layers-grid">
+    <a class="layer-card" href="layer1-worldview.html">
+      <div class="lc-top"><span class="lc-num">Layer 01</span><span class="lc-time">20–30 min</span></div>
+      <div class="lc-title">Worldview Builder</div>
+      <div class="lc-output">→ worldview.md</div>
+      <div class="lc-desc">12 questions across four sections — the real problem, your beliefs about people, your own perspective, the world you're building toward.</div>
+    </a>
+    <a class="layer-card" href="layer2-brand.html">
+      <div class="lc-top"><span class="lc-num">Layer 02</span><span class="lc-time">15–20 min</span></div>
+      <div class="lc-title">Brand Builder</div>
+      <div class="lc-output">→ brand.md</div>
+      <div class="lc-desc">11 questions — who you serve, how you sound, how your values actually show up, where you stand in the landscape.</div>
+    </a>
+    <a class="layer-card" href="layer3-execution.html">
+      <div class="lc-top"><span class="lc-num">Layer 03</span><span class="lc-time">20–25 min</span></div>
+      <div class="lc-title">Execution Builder</div>
+      <div class="lc-output">→ execution.md + System Summary</div>
+      <div class="lc-desc">12 questions — your real process, conditions for excellent work, the constants that never change. Ends with a visual System Summary.</div>
+    </a>
+    <a class="layer-card" href="layer4-coherence.html">
+      <div class="lc-top"><span class="lc-num">Layer 04</span><span class="lc-time">10–15 min</span></div>
+      <div class="lc-title">Coherence Check</div>
+      <div class="lc-output">→ Scored diagnostic report</div>
+      <div class="lc-desc">12 self-guided questions read across all three files. Surfaces alignment, tensions, contradictions, and gaps — with specific actions.</div>
+    </a>
+    <a class="layer-card" href="layer5-workflow.html">
+      <div class="lc-top"><span class="lc-num">Layer 05</span><span class="lc-time">15–20 min</span></div>
+      <div class="lc-title">Workflow Builder</div>
+      <div class="lc-output">→ system.md + file annotations</div>
+      <div class="lc-desc">Maps how your AI moves between the three files depending on the task. Generates a routing OS and annotations to add to each file.</div>
+    </a>
+    <a class="layer-card utility" href="update-checker.html">
+      <div class="lc-top"><span class="lc-num">Ongoing</span><span class="lc-time">2 min</span></div>
+      <div class="lc-title">Update Checker</div>
+      <div class="lc-output">→ Clear / Tension / Contradiction verdict</div>
+      <div class="lc-desc">Run every time you want to add something to a file. Five questions, one verdict, one next step. Prevents contradictions before they compound.</div>
+    </a>
+  </div>
+</div>
+
+<div class="full-divider"></div>
+
+<!-- TWO TRACKS -->
+<div class="section" id="tracks">
+  <div class="section-label">Two ways to go deeper</div>
+  <p style="font-size:1rem;color:var(--muted);font-style:italic;line-height:1.75;margin-bottom:32px;max-width:600px;">Layers 1–3 work entirely in the browser — no AI required. For the coherence check, routing system, and update checker, you have two options.</p>
+  <div class="tracks-grid">
+    <div class="track-card html-track">
+      <div class="track-label">Track 1 — Self-guided</div>
+      <div class="track-title">HTML tools<br>No AI required</div>
+      <div class="track-desc">Work through the checklist, decision tree, and questionnaire yourself. Compiles directly in the browser. Good for understanding the framework deeply.</div>
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--ok);letter-spacing:0.12em;">You're already using this track →</span>
+    </div>
+    <div class="track-card claude-track">
+      <div class="track-label">Track 2 — AI-assisted</div>
+      <div class="track-title">The Claude Way<br>Let Claude analyse</div>
+      <div class="track-desc">Copy-paste prompts for Claude. Paste your files, send the prompt, get a structured report. Faster and often sharper for the analytical layers.</div>
+      <a class="track-link" href="claude-way/index.html">Go to the Claude Way prompts →</a>
+    </div>
+  </div>
+</div>
+
+<div class="full-divider"></div>
+
+<!-- HOW TO USE -->
+<div class="section" id="how">
+  <div class="section-label">How to use your files</div>
+  <div class="use-steps">
+    <div class="use-step">
+      <span class="us-num">01</span>
+      <div class="us-body">
+        <div class="us-title">In any AI conversation</div>
+        <div class="us-desc">At the start of a session, paste the contents of your skill files before giving your task. The AI reads your foundation first and works from it throughout the session.</div>
+      </div>
+    </div>
+    <div class="use-step">
+      <span class="us-num">02</span>
+      <div class="us-body">
+        <div class="us-title">In a Claude Project (free)</div>
+        <div class="us-desc">Create a Project in Claude.ai. Add your files to the Project Knowledge. Every conversation inside that project has your files automatically loaded — you never paste again.</div>
+      </div>
+    </div>
+    <div class="use-step">
+      <span class="us-num">03</span>
+      <div class="us-body">
+        <div class="us-title">As Claude Skills (Pro or higher)</div>
+        <div class="us-desc">Each file is already formatted as a Claude skill. To upload: create a folder named <code>worldview</code>, rename your file to <code>SKILL.md</code>, zip it, and upload via Settings → Capabilities → Skills. Repeat for each file. Claude loads them automatically in relevant conversations.</div>
+      </div>
+    </div>
+    <div class="use-step">
+      <span class="us-num">04</span>
+      <div class="us-body">
+        <div class="us-title">Keep them updated</div>
+        <div class="us-desc">As your thinking evolves, use the <a href="update-checker.html" style="color:var(--accent)">Update Checker</a> before adding anything new. Prevents contradictions that compound silently over time.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <span class="footer-brand">Sovereign Mind System</span>
+  <span class="footer-note">No data leaves your browser. All files compile and download locally.</span>
+</footer>
+
+</body>
+</html>

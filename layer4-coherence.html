@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sovereign Mind — Layer 4: Coherence Check</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,300;0,400;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f7f6f2;--surface:#fff;--surface-2:#f0ede6;--border:#ddd9d0;--border-strong:#c8c3b8;--ink:#1c1a16;--muted:#7a7468;--accent:#1c1a16;--ok:#27744a;--ok-dim:rgba(39,116,74,0.08);--warn:#b07d1a;--warn-dim:rgba(176,125,26,0.08);--signal:#c0392b;--signal-dim:rgba(192,57,43,0.08);--mono:'IBM Plex Mono',monospace;--serif:'IBM Plex Serif',Georgia,serif;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:var(--serif);min-height:100vh;}
+  .container{max-width:820px;margin:0 auto;padding:64px 40px 120px;}
+  .top-bar{display:flex;align-items:center;justify-content:space-between;padding-bottom:24px;border-bottom:1px solid var(--border);margin-bottom:52px;}
+  .system-name{font-family:var(--mono);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);}
+  .step-indicator{display:flex;align-items:center;gap:6px;}
+  .step{width:24px;height:3px;border-radius:2px;background:var(--border);}
+  .step.done{background:var(--ok);}
+  .step.active{background:var(--ink);}
+  .header{margin-bottom:48px;}
+  .header-kicker{font-family:var(--mono);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+  .header-kicker::before{content:'';width:16px;height:1px;background:var(--muted);}
+  .header h1{font-size:clamp(2rem,4.5vw,3rem);font-weight:300;line-height:1.1;letter-spacing:-0.02em;margin-bottom:18px;}
+  .header h1 strong{font-weight:400;display:block;}
+  .header p{font-size:1rem;color:var(--muted);line-height:1.75;max-width:560px;font-style:italic;font-weight:300;}
+  .instruction-panel{background:var(--ink);color:#d8d4c8;padding:28px 32px;border-radius:3px;margin-bottom:40px;}
+  .instruction-panel .panel-label{font-family:var(--mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#7a8090;margin-bottom:12px;}
+  .instruction-panel ol{list-style:none;counter-reset:steps;}
+  .instruction-panel ol li{counter-increment:steps;display:flex;gap:16px;align-items:flex-start;font-size:0.9rem;line-height:1.65;margin-bottom:10px;color:#c0bcb4;}
+  .instruction-panel ol li::before{content:counter(steps);font-family:var(--mono);font-size:10px;color:#5a6070;background:rgba(255,255,255,0.06);width:22px;height:22px;border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+  .check-section{margin-bottom:40px;}
+  .check-section-head{padding:14px 20px;background:var(--surface-2);border:1px solid var(--border);border-radius:3px 3px 0 0;display:flex;align-items:center;gap:12px;}
+  .cs-icon{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;padding:3px 9px;border-radius:2px;background:var(--ink);color:var(--bg);}
+  .cs-title{font-size:1rem;font-weight:400;}
+  .cs-desc{font-size:0.85rem;color:var(--muted);font-style:italic;}
+  .check-items{border:1px solid var(--border);border-top:none;border-radius:0 0 3px 3px;overflow:hidden;}
+  .check-item{display:flex;align-items:flex-start;gap:0;border-bottom:1px solid var(--border);background:var(--surface);transition:background 0.2s;}
+  .check-item:last-child{border-bottom:none;}
+  .check-item.checked-yes{background:rgba(39,116,74,0.04);}
+  .check-item.checked-no{background:rgba(192,57,43,0.04);}
+  .check-item.checked-partial{background:rgba(176,125,26,0.04);}
+  .check-left{padding:16px 20px;flex:1;}
+  .check-q{font-size:0.92rem;line-height:1.6;color:var(--ink);margin-bottom:4px;}
+  .check-hint{font-size:0.8rem;color:var(--muted);font-style:italic;font-family:var(--mono);letter-spacing:0.02em;}
+  .check-right{display:flex;flex-direction:column;justify-content:center;gap:2px;padding:12px 16px;border-left:1px solid var(--border);flex-shrink:0;}
+  .radio-group{display:flex;flex-direction:column;gap:4px;}
+  .radio-opt{display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 8px;border-radius:2px;transition:background 0.15s;}
+  .radio-opt:hover{background:var(--surface-2);}
+  .radio-opt input{appearance:none;-webkit-appearance:none;width:14px;height:14px;border:1px solid var(--border-strong);border-radius:50%;flex-shrink:0;cursor:pointer;transition:all 0.15s;position:relative;}
+  .radio-opt input:checked{border-width:4px;}
+  .radio-opt.yes input:checked{border-color:var(--ok);}
+  .radio-opt.partial input:checked{border-color:var(--warn);}
+  .radio-opt.no input:checked{border-color:var(--signal);}
+  .radio-opt span{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--muted);}
+  /* SCORE */
+  .score-area{background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:32px;text-align:center;margin-bottom:40px;}
+  .score-label{font-family:var(--mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+  .score-display{font-size:3.5rem;font-weight:300;letter-spacing:-0.03em;margin-bottom:8px;transition:color 0.3s;}
+  .score-sub{font-size:0.9rem;color:var(--muted);font-style:italic;}
+  .score-bar-wrap{width:100%;max-width:400px;margin:20px auto 0;background:var(--border);border-radius:2px;height:4px;overflow:hidden;}
+  .score-bar{height:100%;background:var(--ok);transition:width 0.5s ease,background 0.3s;}
+  .btn-report{background:var(--ink);color:var(--bg);border:none;padding:15px 48px;font-family:var(--mono);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;border-radius:2px;margin-top:24px;transition:all 0.2s;}
+  .btn-report:hover{background:#333;transform:translateY(-1px);}
+  /* REPORT */
+  .report-section{display:none;margin-top:40px;}
+  .report-section.visible{display:block;}
+  .report-card{border:1px solid var(--border);border-radius:3px;overflow:hidden;margin-bottom:12px;}
+  .rc-head{display:flex;align-items:center;gap:12px;padding:12px 18px;background:var(--surface-2);border-bottom:1px solid var(--border);}
+  .rc-tag{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;padding:3px 9px;border-radius:2px;}
+  .rc-tag.good{background:var(--ok-dim);color:var(--ok);border:1px solid rgba(39,116,74,0.2);}
+  .rc-tag.review{background:var(--warn-dim);color:var(--warn);border:1px solid rgba(176,125,26,0.2);}
+  .rc-tag.fix{background:var(--signal-dim);color:var(--signal);border:1px solid rgba(192,57,43,0.2);}
+  .rc-title{font-size:0.9rem;color:var(--ink);}
+  .rc-body{padding:16px 18px;font-size:0.9rem;line-height:1.75;color:var(--muted);}
+  .overall-verdict{padding:28px 32px;border-radius:3px;margin-bottom:24px;}
+  .overall-verdict.strong{background:var(--ok-dim);border:1px solid rgba(39,116,74,0.2);}
+  .overall-verdict.moderate{background:var(--warn-dim);border:1px solid rgba(176,125,26,0.25);}
+  .overall-verdict.weak{background:var(--signal-dim);border:1px solid rgba(192,57,43,0.2);}
+  .verdict-label{font-family:var(--mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:8px;}
+  .overall-verdict.strong .verdict-label{color:var(--ok);}
+  .overall-verdict.moderate .verdict-label{color:var(--warn);}
+  .overall-verdict.weak .verdict-label{color:var(--signal);}
+  .verdict-text{font-size:0.95rem;line-height:1.7;color:var(--ink);}
+  .next-steps{padding:24px 28px;background:var(--surface);border:1px solid var(--border);border-radius:3px;margin-top:24px;}
+  .ns-label{font-family:var(--mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+  .ns-item{display:flex;gap:12px;margin-bottom:12px;font-size:0.9rem;line-height:1.6;color:var(--ink);}
+  .ns-item:last-child{margin-bottom:0;}
+  .ns-num{font-family:var(--mono);font-size:10px;color:var(--muted);flex-shrink:0;margin-top:3px;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  @media(max-width:600px){.container{padding:40px 20px 80px;}.check-right{padding:8px;}.radio-opt span{display:none;}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="top-bar">
+    <span class="system-name">Sovereign Mind System</span>
+    <div class="step-indicator">
+      <div class="step done"></div><div class="step done"></div><div class="step done"></div><div class="step active"></div><div class="step"></div>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="header-kicker">Layer 4 · Self-Guided Coherence Check</div>
+    <h1>Do your three layers<br><strong>actually agree?</strong></h1>
+    <p>Work through each question honestly. The questions reveal alignment and contradictions you can't always see from inside your own thinking.</p>
+  </div>
+
+  <div class="instruction-panel">
+    <div class="panel-label">How this works</div>
+    <ol>
+      <li>Work through each section with your three skill files open alongside this page</li>
+      <li>For each question, answer Yes (strong alignment), Partial (some friction), or No (contradiction or gap)</li>
+      <li>Hit Generate Report to see your coherence score and specific actions to take</li>
+      <li>Update any files that need it, then move to Layer 5</li>
+    </ol>
+  </div>
+
+  <!-- SECTION 1: PHILOSOPHY vs BRAND -->
+  <div class="check-section">
+    <div class="check-section-head">
+      <span class="cs-icon">W→B</span>
+      <div><div class="cs-title">Worldview → Brand alignment</div><div class="cs-desc">Does your brand identity reflect what you actually believe?</div></div>
+    </div>
+    <div class="check-items">
+      <div class="check-item" id="ci-1"><div class="check-left"><div class="check-q">The role you describe in brand.md reflects the real problem you named in worldview.md</div><div class="check-hint">If your worldview says the real problem is X, your brand should show you solving X — not a surface version of it</div></div><div class="check-right"><div class="radio-group"><label class="radio-opt yes"><input type="radio" name="c1" value="yes" onchange="update()"><span>Yes</span></label><label class="radio-opt partial"><input type="radio" name="c1" value="partial" onchange="update()"><span>Partial</span></label><label class="radio-opt no"><input type="radio" name="c1" value="no" onchange="update()"><span>No</span></label></div></div></div>
+      <div class="check-item" id="ci-2"><div class="check-left"><div class="check-q">The voice you describe in brand.md is consistent with how you'd communicate the beliefs in worldview.md</div><div class="check-hint">A voice that sounds polished and safe can contradict a worldview that's honest and direct</div></div><div class="check-right"><div class="radio-group"><label class="radio-opt yes"><input type="radio" name="c2" value="yes" onchange="update()"><span>Yes</span></label><label class="radio-opt partial"><input type="radio" name="c2" value="partial" onchange="update()"><span>Partial</span></label><label class="radio-opt no"><input type="radio" name="c2" value="no" onchange="update()"><span>No</span></label></div></div></div>
+      <div class="check-item" id="ci-3"><div class="check-left"><div class="check-q">The "What I Will Not Do" sections in both files are consistent — they don't allow something in one file that the other forbids</div><div class="check-hint">Check both non-negotiable lists against each other for hidden contradictions</div></div><div class="check-right"><div class="radio-group"><label class="radio-opt yes"><input type="radio" name="c3" value="yes" onchange="update()"><span>Yes</span></label><label class="radio-opt partial"><input type="radio" name="c3" value="partial" onchange="update()"><span>Partial</span></label><label class="radio-opt no"><input type="radio" name="c3" value="no" onchange="update()"><span>No</span></label></div></div></div>
+      <div class="check-item" id="ci-4"><div class="check-left"><div class="check-q">Your stated position (brand.md) is a natural consequence of your worldview — not a manufactured angle</div><div class="check-hint">Positioning that doesn't follow from belief feels hollow to the audience over time</div></div><div class="check-right"><div class="radio-group"><label class="radio-opt yes"><input type="radio" name="c4" value="yes" onchange="update()"><span>Yes</span></label><label class="radio-opt partial"><input type="radio" name="c4" value="partial" onchange="update()"><span>Partial</span></label><label class="radio-opt no"><input type="radio" name="c4" value="no" onchange="update()"><span>No</span></label></div></div></div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: BRAND vs EXECUTION -->
+  <div class="check-section">
+    <div class="check-section-head">
+      <span class="cs-icon">B→E</span>
+      <div><div class="cs-title">Brand → Execution alignment</div><div class="cs-desc">Does how you work match who you say you are?</div></div>
+    </div>
+    <div class="check-items">
+      <div class="check-item" id="ci-5"><div class="check-left"><div class="check-q">The conditions you need to do your best work (execution.md) are consistent with the experience you promise clients (brand.md)</div><div class="check-hint">If you promise calm and trust but your process is chaotic, something needs to change</div></div><div class="check-right"><div class="radio-group"><label class="radio-opt yes"><input type="radio" name="c5" value="yes" onchange="update()"><span>Yes</span></label><label class="radio-opt partial"><input type="radio" name="c5" value="partial" onchange="update()"><span>Partial</span></label><label class="radio-opt no"><input type="radio" name="c5" value="no" onchange="update()"><span>No</span></label></div></div></div>
+      <div class="check-item" id="ci-6"><div class="check-left"><div class="check-q">The quality standard in execution.md lives up to the promise in brand.md</div><div class="check-hint">Your quality floor should be at least as high as what your brand promises</div></div><div class="check-right"><div class="radio-group"><label class="radio-opt yes"><input type="radio" name="c6" value="yes" onchange="update()"><span>Yes</span></label><label class="radio-opt partial"><input type="radio" name="c6" value="partial" onchange="update()"><span>Partial</span></label><label class="radio-opt no"><input type="radio" name="c6" value="no" onchange="update()"><span>No</span></label></div></div></div>
+      <div class="check-item" id="ci-7"><div class="check-left"><div class="check-q">What you've permanently retired (execution.md) is consistent with your non-negotiables in brand.md</div><div class="check-hint">You shouldn't have retired an approach that your brand still implicitly uses</div></div><div class="check-right"><div class="radio-group"><label class="radio-opt yes"><input type="radio" name="c7" value="yes" onchange="update()"><span>Yes</span></label><label class="radio-opt partial"><input type="radio" name="c7" value="partial" onchange="update()"><span>Partial</span></label><label class="radio-opt no"><input type="radio" name="c7" value="no" onchange="update()"><span>No</span></label></div></div></div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: WORLDVIEW vs EXECUTION -->
+  <div class="check-section">
+    <div class="check-section-head">
+      <span class="cs-icon">W→E</span>
+      <div><div class="cs-title">Worldview → Execution alignment</div><div class="cs-desc">Does your methodology reflect what you believe about how change actually happens?</div></div>
+    </div>
+    <div class="check-items">
+      <div class="check-item" id="ci-8"><div class="check-left"><div class="check-q">The essential first step in your process (execution.md) reflects what you said real change requires (worldview.md)</div><div class="check-hint">If you believe preparation matters above all, your process should start with preparation</div></div><div class="check-right"><div class="radio-group"><label class="radio-opt yes"><input type="radio" name="c8" value="yes" onchange="update()"><span>Yes</span></label><label class="radio-opt partial"><input type="radio" name="c8" value="partial" onchange="update()"><span>Partial</span></label><label class="radio-opt no"><input type="radio" name="c8" value="no" onchange="update()"><span>No</span></label></div></div></div>
+      <div class="check-item" id="ci-9"><div class="check-left"><div class="check-q">Your core working principle (execution.md) is a direct expression of what you stand for (worldview.md)</div><div class="check-hint">The deepest layer of your methodology should flow from the deepest layer of your beliefs</div></div><div class="check-right"><div class="radio-group"><label class="radio-opt yes"><input type="radio" name="c9" value="yes" onchange="update()"><span>Yes</span></label><label class="radio-opt partial"><input type="radio" name="c9" value="partial" onchange="update()"><span>Partial</span></label><label class="radio-opt no"><input type="radio" name="c9" value="no" onchange="update()"><span>No</span></label></div></div></div>
+      <div class="check-item" id="ci-10"><div class="check-left"><div class="check-q">There are no approaches in execution.md that contradict the beliefs you stated you'd "lose clients over" in worldview.md</div><div class="check-hint">This is the most important check. If execution uses tactics worldview rejects, the whole system is compromised.</div></div><div class="check-right"><div class="radio-group"><label class="radio-opt yes"><input type="radio" name="c10" value="yes" onchange="update()"><span>Yes</span></label><label class="radio-opt partial"><input type="radio" name="c10" value="partial" onchange="update()"><span>Partial</span></label><label class="radio-opt no"><input type="radio" name="c10" value="no" onchange="update()"><span>No</span></label></div></div></div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: GAPS -->
+  <div class="check-section">
+    <div class="check-section-head">
+      <span class="cs-icon">GAPS</span>
+      <div><div class="cs-title">Gaps — things implied but missing</div><div class="cs-desc">What's been left out that should be in one of the files?</div></div>
+    </div>
+    <div class="check-items">
+      <div class="check-item" id="ci-11"><div class="check-left"><div class="check-q">Every major belief in worldview.md is visible somewhere in either brand.md or execution.md</div><div class="check-hint">Beliefs that don't show up in how you work or how you present yourself aren't actually operational yet</div></div><div class="check-right"><div class="radio-group"><label class="radio-opt yes"><input type="radio" name="c11" value="yes" onchange="update()"><span>Yes</span></label><label class="radio-opt partial"><input type="radio" name="c11" value="partial" onchange="update()"><span>Partial</span></label><label class="radio-opt no"><input type="radio" name="c11" value="no" onchange="update()"><span>No</span></label></div></div></div>
+      <div class="check-item" id="ci-12"><div class="check-left"><div class="check-q">Your execution.md is specific enough that an AI could follow it — not so generic it adds nothing</div><div class="check-hint">Vague process descriptions don't constrain AI output. Specific ones do.</div></div><div class="check-right"><div class="radio-group"><label class="radio-opt yes"><input type="radio" name="c12" value="yes" onchange="update()"><span>Yes</span></label><label class="radio-opt partial"><input type="radio" name="c12" value="partial" onchange="update()"><span>Partial</span></label><label class="radio-opt no"><input type="radio" name="c12" value="no" onchange="update()"><span>No</span></label></div></div></div>
+    </div>
+  </div>
+
+  <!-- SCORE -->
+  <div class="score-area">
+    <div class="score-label">Coherence Score</div>
+    <div class="score-display" id="scoreDisplay">—</div>
+    <div class="score-sub" id="scoreSub">Answer the questions above to see your score</div>
+    <div class="score-bar-wrap"><div class="score-bar" id="scoreBar" style="width:0%"></div></div>
+    <button class="btn-report" onclick="generateReport()">Generate My Coherence Report →</button>
+  </div>
+
+  <!-- REPORT -->
+  <div class="report-section" id="reportSection">
+    <div class="overall-verdict" id="overallVerdict">
+      <div class="verdict-label" id="verdictLabel"></div>
+      <div class="verdict-text" id="verdictText"></div>
+    </div>
+    <div id="reportCards"></div>
+    <div class="next-steps">
+      <div class="ns-label">What to do next</div>
+      <div id="nextStepsContent"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const checks=['c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12'];
+  const questions={
+    c1:{text:'Role reflects real problem',section:'W→B',hint:'In brand.md, find "The Role I Play" and compare it to worldview.md "The Real Problem I Solve". If the role sounds more polished than the problem is real, update brand.md.'},
+    c2:{text:'Voice consistent with beliefs',section:'W→B',hint:'If your worldview is direct and challenging, your brand voice should be too. Soften one and the other loses credibility.'},
+    c3:{text:'Non-negotiables consistent',section:'W→B',hint:'Compare both "What I Will Not Do" sections. Add any missing lines to whichever file is thinner.'},
+    c4:{text:'Position follows from belief',section:'W→B',hint:'Ask yourself: if someone read only your worldview, would they predict your positioning? If not, the positioning is marketing — not conviction.'},
+    c5:{text:'Process matches client promise',section:'B→E',hint:'If brand promises clarity and ease, execution needs to deliver that internally too. Check your conditions and process.'},
+    c6:{text:'Quality standard matches brand promise',section:'B→E',hint:'Your quality floor should be at or above what brand promises. If brand makes strong promises, strengthen the quality standard.'},
+    c7:{text:'Retired approaches consistent with non-negotiables',section:'B→E',hint:'If you retired an approach but still describe something similar in brand.md, reconcile them.'},
+    c8:{text:'First step reflects change theory',section:'W→E',hint:'The way you start work should reflect what you believe about how change happens. If they\'re misaligned, update execution.md Step 1.'},
+    c9:{text:'Working principle flows from stand',section:'W→E',hint:'Your core working principle in execution.md should be the practical version of "What I Stand For" in worldview.md. They should feel like the same idea at different altitudes.'},
+    c10:{text:'No tactics contradict worldview',section:'W→E',hint:'This is the most critical check. Go line by line through execution.md and ask: does anything here contradict what I said I\'d lose clients over?'},
+    c11:{text:'All beliefs show up operationally',section:'GAPS',hint:'Every major conviction in worldview.md should appear in either brand.md or execution.md. If a belief has no operational expression, it\'s just a claim.'},
+    c12:{text:'Execution.md specific enough to constrain AI',section:'GAPS',hint:'Test it: paste execution.md into Claude and ask it to write a piece of content. Does it actually write differently than it would without the file? If not, the file needs more specificity.'}
+  };
+
+  function getVal(name){const r=document.querySelector(`input[name="${name}"]:checked`);return r?r.value:null;}
+
+  function update(){
+    const vals=checks.map(c=>getVal(c));
+    const answered=vals.filter(v=>v!==null).length;
+    const yes=vals.filter(v=>v==='yes').length;
+    const partial=vals.filter(v=>v==='partial').length;
+    const score=answered>0?Math.round((yes*100+partial*50)/(answered*100)*100):0;
+
+    document.getElementById('scoreDisplay').textContent=answered>0?score+'%':'—';
+    document.getElementById('scoreDisplay').style.color=score>=80?'var(--ok)':score>=55?'var(--warn)':'var(--signal)';
+    document.getElementById('scoreSub').textContent=answered+' of 12 answered'+(answered===12?'':' — complete all for full report');
+    document.getElementById('scoreBar').style.width=score+'%';
+    document.getElementById('scoreBar').style.background=score>=80?'var(--ok)':score>=55?'var(--warn)':'var(--signal)';
+
+    checks.forEach(c=>{
+      const val=getVal(c);
+      const idx=checks.indexOf(c)+1;
+      const el=document.getElementById('ci-'+idx);
+      if(el){el.className='check-item'+(val?' checked-'+val:'');}
+    });
+  }
+
+  function generateReport(){
+    const vals={};
+    checks.forEach(c=>{vals[c]=getVal(c)||'unanswered';});
+    const yesCount=checks.filter(c=>vals[c]==='yes').length;
+    const partialCount=checks.filter(c=>vals[c]==='partial').length;
+    const noCount=checks.filter(c=>vals[c]==='no').length;
+    const score=Math.round((yesCount*100+partialCount*50)/(checks.length*100)*100);
+
+    const verdictEl=document.getElementById('overallVerdict');
+    const verdictLabel=document.getElementById('verdictLabel');
+    const verdictText=document.getElementById('verdictText');
+
+    if(score>=80){
+      verdictEl.className='overall-verdict strong';
+      verdictLabel.textContent='Strong Coherence';
+      verdictText.textContent=`Your three layers are well-aligned. ${noCount===0?'No contradictions detected.':'Address the flagged items below before building your routing system.'} The system is ready to work from — your AI will produce output consistent with your actual thinking.`;
+    } else if(score>=55){
+      verdictEl.className='overall-verdict moderate';
+      verdictLabel.textContent='Moderate Coherence — Review Needed';
+      verdictText.textContent=`Your layers are partially aligned but have gaps or tensions that will produce inconsistent AI output. The ${partialCount} partial and ${noCount} contradiction items below need to be addressed before the system is reliable. Focus on the contradictions first — they're the ones that will cause the most drift.`;
+    } else {
+      verdictEl.className='overall-verdict weak';
+      verdictLabel.textContent='Low Coherence — Reconciliation Required';
+      verdictText.textContent=`There are significant contradictions or gaps between your layers. This means your AI will receive conflicting instructions and produce unreliable output. Work through the items below before proceeding — don't build a routing system on a foundation that isn't solid yet.`;
+    }
+
+    const cards=document.getElementById('reportCards');
+    cards.innerHTML='';
+    checks.forEach(c=>{
+      const val=vals[c];
+      if(val==='unanswered') return;
+      const q=questions[c];
+      const tag=val==='yes'?'good':val==='partial'?'review':'fix';
+      const tagText=val==='yes'?'Coherent':val==='partial'?'Review':'Fix This';
+      const card=document.createElement('div');
+      card.className='report-card';
+      card.innerHTML=`<div class="rc-head"><span class="rc-tag ${tag}">${tagText}</span><span class="rc-title">${q.text} <span style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:8px">${q.section}</span></span></div>${val!=='yes'?`<div class="rc-body">${q.hint}</div>`:''}`;
+      cards.appendChild(card);
+    });
+
+    const ns=document.getElementById('nextStepsContent');
+    const items=[];
+    if(noCount>0) items.push({n:'01',t:`Fix ${noCount} contradiction${noCount>1?'s':''} — start with the W→E section as worldview.md is always the authority.`});
+    if(partialCount>0) items.push({n:'02',t:`Strengthen ${partialCount} partial item${partialCount>1?'s':''} — read the hint for each and update the relevant file.`});
+    if(score>=80) items.push({n:'01',t:'Your files are coherent. Run the check again after any update to make sure it stays that way.'});
+    items.push({n:items.length===0?'01':String(items.length+1).padStart(2,'0'),t:'<a href="layer5-workflow.html" style="color:inherit;text-decoration:underline">Proceed to Layer 5 — Workflow Builder →</a>'});
+    ns.innerHTML=items.map(i=>`<div class="ns-item"><span class="ns-num">${i.n}</span><span>${i.t}</span></div>`).join('');
+
+    document.getElementById('reportSection').classList.add('visible');
+    document.getElementById('reportSection').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  update();
+</script>
+</body>
+</html>

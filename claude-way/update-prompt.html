@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Update Checker Prompt — Claude Way</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,300;0,400;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0d1117;--surface:#161b22;--border:#2a3340;--accent:#58a6ff;--text:#c9d1d9;--muted:#6a7a8a;--ok:#3fb68a;--serif:'IBM Plex Serif',Georgia,serif;--mono:'IBM Plex Mono',monospace;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--serif);min-height:100vh;}
+  .page{max-width:800px;margin:0 auto;padding:64px 40px 120px;}
+  .back{font-family:var(--mono);font-size:10px;letter-spacing:0.15em;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:8px;margin-bottom:48px;transition:color 0.2s;}
+  .back:hover{color:var(--text);}
+  .badge{font-family:var(--mono);font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);background:rgba(88,166,255,0.1);border:1px solid rgba(88,166,255,0.2);padding:4px 12px;border-radius:2px;display:inline-block;margin-bottom:20px;}
+  h1{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:300;line-height:1.15;letter-spacing:-0.02em;margin-bottom:16px;}
+  h1 em{font-style:italic;color:var(--accent);}
+  .intro{font-size:1rem;color:var(--muted);line-height:1.8;font-style:italic;margin-bottom:40px;}
+  .instructions{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:24px 28px;margin-bottom:32px;}
+  .inst-label{font-family:var(--mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+  .inst-step{display:flex;gap:14px;margin-bottom:10px;font-size:0.9rem;line-height:1.65;}
+  .inst-step:last-child{margin-bottom:0;}
+  .inst-num{font-family:var(--mono);font-size:10px;color:var(--muted);flex-shrink:0;margin-top:3px;}
+  .prompt-label{font-family:var(--mono);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+  .prompt-box{background:#080c10;color:#a0c4a0;padding:28px 32px;border-radius:4px;font-family:var(--mono);font-size:0.77rem;line-height:1.85;white-space:pre-wrap;word-break:break-word;border:1px solid var(--border);max-height:400px;overflow-y:auto;margin-bottom:12px;}
+  .prompt-box::-webkit-scrollbar{width:4px;}
+  .prompt-box::-webkit-scrollbar-thumb{background:#2a3a4a;border-radius:2px;}
+  .copy-row{display:flex;align-items:center;gap:12px;}
+  .btn-copy{font-family:var(--mono);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;padding:9px 20px;cursor:pointer;background:var(--accent);color:#0d1117;border:none;border-radius:2px;font-weight:500;transition:all 0.2s;}
+  .btn-copy:hover{opacity:0.85;}
+  .copy-ok{font-family:var(--mono);font-size:10px;color:var(--ok);letter-spacing:0.1em;opacity:0;transition:opacity 0.3s;}
+  .copy-ok.show{opacity:1;}
+</style>
+</head>
+<body>
+<div class="page">
+  <a class="back" href="index.html">← Back to Claude Way</a>
+  <div class="badge">Prompt 03 — Update Checker</div>
+  <h1>Check a proposed addition <em>before you add it</em></h1>
+  <p class="intro">Write what you want to add, specify which file it's going into, paste your existing files. Claude checks the addition against everything you've built and returns a clear verdict with a concrete next step.</p>
+
+  <div class="instructions">
+    <div class="inst-label">How to use this prompt</div>
+    <div class="inst-step"><span class="inst-num">01</span><span>Copy the prompt below</span></div>
+    <div class="inst-step"><span class="inst-num">02</span><span>Open Claude.ai and paste it in</span></div>
+    <div class="inst-step"><span class="inst-num">03</span><span>Fill in your proposed addition and which file it's going into, then paste your skill files</span></div>
+    <div class="inst-step"><span class="inst-num">04</span><span>Claude returns a verdict: Clear (add it), Tension (resolve first), or Contradiction (reconcile before proceeding)</span></div>
+  </div>
+
+  <div class="prompt-label">Copy this prompt</div>
+  <div class="prompt-box" id="promptBox">You are a coherence checker for a solopreneur's Sovereign Mind skill system. Check a proposed addition against their existing files and return an honest verdict.
+
+Be direct. This is quality control, not validation. worldview.md is the highest authority — if the addition contradicts it, name it clearly regardless of how useful the addition might seem.
+
+---
+
+PROPOSED ADDITION:
+Target file: [worldview.md / brand.md / execution.md / system.md]
+
+Content to add:
+[WRITE WHAT YOU WANT TO ADD HERE]
+
+---
+
+EXISTING FILES:
+
+WORLDVIEW.MD:
+[PASTE WORLDVIEW.MD HERE]
+
+BRAND.MD:
+[PASTE BRAND.MD HERE]
+
+EXECUTION.MD:
+[PASTE EXECUTION.MD HERE]
+
+---
+
+Return a structured verdict:
+
+VERDICT: Clear / Tension / Contradiction
+
+SUMMARY: One sentence. Plain and direct. Tells them exactly where they stand.
+
+FINDINGS: 2-4 specific observations. Reference their actual words from both the addition and the existing files. Name exactly where conflicts occur. If the addition is clear, explain precisely why it fits.
+
+RECOMMENDATION: 2-4 sentences. The actionable bottom line. If Clear: confirm they can add it and suggest exact phrasing that fits the file's voice. If Tension: explain what to resolve first and how. If Contradiction: name the exact conflict and what needs to be reconciled — worldview.md is always the authority. Always end with a concrete next step.
+
+Reminder: wordview.md is always the authority. If the addition contradicts it, that may mean the addition needs rethinking — or it may mean worldview.md needs updating to reflect genuine growth. Make this distinction clear in your recommendation.</div>
+  <div class="copy-row">
+    <button class="btn-copy" onclick="copy()">Copy Prompt</button>
+    <span class="copy-ok" id="copyOk">Copied ✓</span>
+  </div>
+</div>
+<script>function copy(){navigator.clipboard.writeText(document.getElementById('promptBox').textContent).then(()=>{const el=document.getElementById('copyOk');el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500);});}</script>
+</body>
+</html>

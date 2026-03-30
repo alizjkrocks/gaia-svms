@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sovereign Mind — Update Checker</title>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Azeret+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f9f7f2;--surface:#fff;--surface-2:#f2ede3;--border:#e0d8c8;--border-2:#c8bfaa;--ink:#1a1612;--muted:#7a7060;--warm:#b87333;--warm-dim:rgba(184,115,51,0.1);--ok:#3a7a52;--ok-dim:rgba(58,122,82,0.08);--warn:#b87333;--warn-dim:rgba(184,115,51,0.08);--signal:#c0392b;--signal-dim:rgba(192,57,43,0.08);--signal-border:rgba(192,57,43,0.2);--serif:'Spectral',Georgia,serif;--mono:'Azeret Mono',monospace;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:var(--serif);min-height:100vh;}
+  .page{max-width:820px;margin:0 auto;padding:64px 40px 120px;}
+  .top-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:52px;padding-bottom:20px;border-bottom:1px solid var(--border);}
+  .nav-brand{font-family:var(--mono);font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--warm);}
+  .nav-tag{font-family:var(--mono);font-size:10px;letter-spacing:0.14em;color:var(--muted);background:var(--surface-2);border:1px solid var(--border);padding:4px 12px;border-radius:2px;}
+  .header{margin-bottom:48px;}
+  .header-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--warm);margin-bottom:20px;display:flex;align-items:center;gap:12px;}
+  .header-eyebrow::before{content:'';width:20px;height:1px;background:var(--warm);opacity:0.5;}
+  .header h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:300;line-height:1.1;letter-spacing:-0.025em;margin-bottom:18px;}
+  .header h1 em{font-style:italic;color:var(--warm);}
+  .header p{font-size:1rem;color:var(--muted);line-height:1.8;font-weight:300;font-style:italic;max-width:560px;}
+  /* GUIDE */
+  .guide-toggle{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;background:var(--surface-2);border:1px solid var(--border);border-radius:3px;cursor:pointer;user-select:none;transition:all 0.2s;margin-bottom:0;}
+  .guide-toggle:hover{border-color:var(--border-2);}
+  .guide-left{display:flex;align-items:center;gap:14px;}
+  .guide-icon{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--warm);background:var(--warm-dim);border:1px solid rgba(184,115,51,0.2);padding:3px 9px;border-radius:2px;}
+  .guide-toggle h2{font-size:1rem;font-weight:400;}
+  .guide-arrow{font-family:var(--mono);font-size:12px;color:var(--muted);transition:transform 0.3s;}
+  .guide-arrow.open{transform:rotate(180deg);}
+  .guide-body{display:none;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 3px 3px;padding:32px 36px;margin-bottom:40px;}
+  .guide-body.open{display:block;}
+  .guide-intro{font-size:1rem;line-height:1.8;color:var(--muted);font-style:italic;margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid var(--border);}
+  .rule{margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border);}
+  .rule:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+  .rule-head{display:flex;align-items:flex-start;gap:16px;margin-bottom:8px;}
+  .rule-tag{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;padding:3px 9px;border-radius:2px;flex-shrink:0;margin-top:2px;}
+  .rule-tag.when{background:rgba(42,92,138,0.08);color:#2a5c8a;border:1px solid rgba(42,92,138,0.2);}
+  .rule-tag.do{background:var(--ok-dim);color:var(--ok);border:1px solid rgba(58,122,82,0.2);}
+  .rule-tag.dont{background:var(--signal-dim);color:var(--signal);border:1px solid var(--signal-border);}
+  .rule-title{font-size:1rem;font-weight:500;color:var(--ink);line-height:1.4;}
+  .rule-body{font-size:0.9rem;line-height:1.75;color:var(--muted);padding-left:68px;}
+  /* SECTION DIVIDER */
+  .sdiv{display:flex;align-items:center;gap:16px;margin:48px 0 28px;}
+  .sdiv span{font-family:var(--mono);font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--warm);white-space:nowrap;}
+  .sdiv::before,.sdiv::after{content:'';flex:1;height:1px;background:var(--border);}
+  /* CHECKER */
+  .checker-intro{font-size:0.95rem;color:var(--muted);line-height:1.75;font-style:italic;margin-bottom:32px;}
+  .field-block{background:var(--surface);border:1px solid var(--border);border-radius:3px;overflow:hidden;margin-bottom:16px;transition:border-color 0.2s;}
+  .field-block:focus-within{border-color:var(--border-2);}
+  .field-block.has-content{border-color:rgba(58,122,82,0.3);}
+  .field-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--surface-2);border-bottom:1px solid var(--border);}
+  .field-badge{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;padding:3px 9px;border-radius:2px;transition:all 0.2s;}
+  .field-badge.new{background:var(--warn-dim);color:var(--warn);border:1px solid rgba(184,115,51,0.3);}
+  .field-badge.existing{background:rgba(42,92,138,0.08);color:#2a5c8a;border:1px solid rgba(42,92,138,0.2);}
+  .field-badge.ok{background:var(--ok-dim);color:var(--ok);border:1px solid rgba(58,122,82,0.3);}
+  .field-label{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.05em;}
+  .field-status{font-family:var(--mono);font-size:10px;color:var(--border-2);letter-spacing:0.08em;transition:color 0.2s;}
+  .field-block.has-content .field-status{color:var(--ok);}
+  select{background:var(--surface);border:1px solid var(--border);border-radius:2px;padding:7px 12px;font-family:var(--mono);font-size:11px;color:var(--ink);outline:none;cursor:pointer;transition:border-color 0.2s;letter-spacing:0.05em;margin:12px 20px;}
+  select:focus{border-color:var(--warm);}
+  textarea{width:100%;background:var(--surface);border:none;padding:16px 20px;font-family:var(--serif);font-size:0.9rem;color:var(--ink);line-height:1.7;resize:vertical;outline:none;min-height:90px;}
+  textarea.mono-area{font-family:var(--mono);font-size:0.75rem;line-height:1.8;min-height:110px;}
+  textarea::placeholder{color:var(--border-2);font-style:italic;}
+  /* DECISION TREE */
+  .decision-section{margin-bottom:32px;}
+  .decision-q{background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:20px 24px;margin-bottom:12px;}
+  .dq-text{font-size:0.95rem;line-height:1.6;color:var(--ink);margin-bottom:14px;}
+  .dq-hint{font-size:0.82rem;color:var(--muted);font-style:italic;font-family:var(--mono);margin-bottom:14px;display:block;}
+  .dq-options{display:flex;gap:8px;flex-wrap:wrap;}
+  .dq-btn{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;padding:8px 16px;cursor:pointer;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:2px;transition:all 0.2s;}
+  .dq-btn:hover{color:var(--ink);border-color:var(--border-2);}
+  .dq-btn.selected-yes{background:var(--ok-dim);color:var(--ok);border-color:rgba(58,122,82,0.4);}
+  .dq-btn.selected-no{background:var(--signal-dim);color:var(--signal);border-color:var(--signal-border);}
+  .dq-btn.selected-partial{background:var(--warn-dim);color:var(--warn);border-color:rgba(184,115,51,0.3);}
+  /* RUN */
+  .run-area{background:var(--surface-2);border:1px solid var(--border);border-radius:3px;padding:36px;text-align:center;margin-top:24px;}
+  .run-area p{font-size:0.92rem;color:var(--muted);font-style:italic;line-height:1.7;margin-bottom:24px;max-width:440px;margin-left:auto;margin-right:auto;}
+  .btn-run{background:var(--ink);color:var(--bg);border:none;padding:15px 48px;font-family:var(--mono);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all 0.2s;}
+  .btn-run:hover{background:var(--warm);transform:translateY(-2px);}
+  /* VERDICT */
+  .verdict-section{display:none;margin-top:40px;}
+  .verdict-section.visible{display:block;}
+  .verdict-banner{border-radius:3px;padding:20px 28px;margin-bottom:24px;display:flex;align-items:flex-start;gap:16px;}
+  .verdict-banner.clear{background:var(--ok-dim);border:1px solid rgba(58,122,82,0.25);}
+  .verdict-banner.tension{background:var(--warn-dim);border:1px solid rgba(184,115,51,0.3);}
+  .verdict-banner.contradiction{background:var(--signal-dim);border:var(--signal-border);}
+  .verdict-icon{font-size:1.4rem;flex-shrink:0;margin-top:2px;}
+  .verdict-label{font-family:var(--mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:6px;}
+  .verdict-banner.clear .verdict-label{color:var(--ok);}
+  .verdict-banner.tension .verdict-label{color:var(--warn);}
+  .verdict-banner.contradiction .verdict-label{color:var(--signal);}
+  .verdict-text{font-size:0.95rem;line-height:1.7;color:var(--ink);}
+  .verdict-action{margin-top:12px;font-size:0.9rem;line-height:1.7;color:var(--muted);}
+  .verdict-action strong{color:var(--ink);font-weight:400;}
+  .rerun-row{text-align:center;margin-top:28px;padding-top:20px;border-top:1px solid var(--border);}
+  .btn-rerun{font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;padding:10px 24px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:2px;cursor:pointer;transition:all 0.2s;}
+  .btn-rerun:hover{color:var(--ink);border-color:var(--border-2);}
+  @media(max-width:600px){.page{padding:40px 20px 80px;}.rule-body{padding-left:0;margin-top:8px;}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="top-nav">
+    <span class="nav-brand">Sovereign Mind System</span>
+    <span class="nav-tag">Ongoing Maintenance</span>
+  </div>
+
+  <div class="header">
+    <div class="header-eyebrow">Update Guide & Checker</div>
+    <h1>Keep your system<br><em>honest as you grow.</em></h1>
+    <p>Before adding anything to your skill files — run it through this decision tree. It takes two minutes and prevents contradictions that compound silently over time.</p>
+  </div>
+
+  <!-- GUIDE -->
+  <div class="guide-toggle" onclick="toggleGuide()">
+    <div class="guide-left"><span class="guide-icon">GUIDE</span><h2>How to Update Your Skill Files — Read This First</h2></div>
+    <span class="guide-arrow" id="guideArrow">↓</span>
+  </div>
+  <div class="guide-body" id="guideBody">
+    <p class="guide-intro">Your skill files are living documents. As your thinking evolves, your methods sharpen, and your experience deepens — the files should reflect that. But updates carry risk. The execution layer especially changes frequently, and a new tactic or framework added in isolation can quietly contradict a belief you committed to in your worldview layer.</p>
+    <div class="rule"><div class="rule-head"><span class="rule-tag when">When</span><span class="rule-title">Update when your thinking has genuinely changed — not just your tactics</span></div><div class="rule-body">A new tool, a new technique, a new framework you've picked up belongs in execution.md only if it's consistent with your existing philosophy. If it requires you to change how you see the problem or the people you serve, update worldview.md first. <strong>Execution never leads. Philosophy leads.</strong></div></div>
+    <div class="rule"><div class="rule-head"><span class="rule-tag do">Do</span><span class="rule-title">Update in the right layer</span></div><div class="rule-body">worldview.md → shifts in what you believe. brand.md → changes in how you show up or communicate. execution.md → new methods, tools, frameworks, or process refinements. system.md → new task types or routing adjustments. Every update belongs in exactly one file.</div></div>
+    <div class="rule"><div class="rule-head"><span class="rule-tag dont">Don't</span><span class="rule-title">Never add without running this checker first</span></div><div class="rule-body">Every proposed addition to any skill file should pass through this decision tree before being added. worldview.md is always the authority. If something contradicts it, either don't add it — or update worldview.md first and reconcile the change intentionally.</div></div>
+    <div class="rule"><div class="rule-head"><span class="rule-tag do">Do</span><span class="rule-title">Translate borrowed frameworks into your own words before adding</span></div><div class="rule-body">If you can't explain why an addition belongs in your system in one sentence, it probably doesn't — yet. Write updates in the same register as the rest of your file. If you're using jargon from a course or a book, translate it first.</div></div>
+  </div>
+
+  <div class="sdiv"><span>Update Checker</span></div>
+
+  <p class="checker-intro">Describe what you want to add, answer the decision tree questions, and get a clear verdict on whether to add it, adjust it first, or resolve a conflict before proceeding.</p>
+
+  <!-- WHAT TO ADD -->
+  <div class="field-block" id="fb-add">
+    <div class="field-head"><div style="display:flex;align-items:center;gap:10px"><span class="field-badge new">New Addition</span><span class="field-label">What you want to add</span></div><span class="field-status" id="add-status">empty</span></div>
+    <div style="padding:4px 0">
+      <select id="targetFile"><option value="worldview.md">worldview.md — Philosophy & Beliefs</option><option value="brand.md">brand.md — Identity & Voice</option><option value="execution.md" selected>execution.md — Methodology & Process</option><option value="system.md">system.md — Routing & Workflow</option></select>
+      <textarea id="addition" rows="5" placeholder="Write the content you want to add — in your own words. A new method, a refined belief, a new process step. Be as specific as you would in the actual file..." oninput="handleAdd(this)"></textarea>
+    </div>
+  </div>
+
+  <!-- DECISION TREE -->
+  <div class="decision-section">
+
+    <div class="decision-q" id="dq1">
+      <div class="dq-text">Does this addition use the same language and tone as your existing files — your words, not borrowed framework language?</div>
+      <span class="dq-hint">→ If it sounds like something you copied from a course or book, it's not ready to add yet.</span>
+      <div class="dq-options">
+        <button class="dq-btn" onclick="setDq('dq1','yes',this)">Yes — it's my language</button>
+        <button class="dq-btn" onclick="setDq('dq1','no',this)">No — it's borrowed language</button>
+      </div>
+    </div>
+
+    <div class="decision-q" id="dq2">
+      <div class="dq-text">Does this addition stay within the layer you selected — philosophy in worldview, identity in brand, process in execution?</div>
+      <span class="dq-hint">→ If it crosses layers, split it and add each piece to the right file separately.</span>
+      <div class="dq-options">
+        <button class="dq-btn" onclick="setDq('dq2','yes',this)">Yes — it belongs in this file</button>
+        <button class="dq-btn" onclick="setDq('dq2','no',this)">No — it crosses layers</button>
+      </div>
+    </div>
+
+    <div class="decision-q" id="dq3">
+      <div class="dq-text">Does this addition contradict or soften anything you wrote in worldview.md — especially what you said you believe strongly enough to "lose clients over"?</div>
+      <span class="dq-hint">→ Be honest here. This is the most important check.</span>
+      <div class="dq-options">
+        <button class="dq-btn" onclick="setDq('dq3','yes',this)">Yes — it contradicts my worldview</button>
+        <button class="dq-btn" onclick="setDq('dq3','no',this)">No — it's consistent</button>
+        <button class="dq-btn" onclick="setDq('dq3','partial',this)">Not sure</button>
+      </div>
+    </div>
+
+    <div class="decision-q" id="dq4">
+      <div class="dq-text">Does this addition contradict or complicate your "What I Will Not Do" sections in either worldview.md or brand.md?</div>
+      <span class="dq-hint">→ Check both non-negotiable lists. Tactics that belong in execution but violate your stated values need to be resolved.</span>
+      <div class="dq-options">
+        <button class="dq-btn" onclick="setDq('dq4','yes',this)">Yes — it contradicts my non-negotiables</button>
+        <button class="dq-btn" onclick="setDq('dq4','no',this)">No — it's consistent</button>
+        <button class="dq-btn" onclick="setDq('dq4','partial',this)">Partially — there's some friction</button>
+      </div>
+    </div>
+
+    <div class="decision-q" id="dq5">
+      <div class="dq-text">Can you explain in one sentence why this addition belongs in your system — how it extends or deepens what's already there?</div>
+      <span class="dq-hint">→ If you can't, the thinking isn't ready yet. Write that sentence before adding.</span>
+      <div class="dq-options">
+        <button class="dq-btn" onclick="setDq('dq5','yes',this)">Yes — I can explain it clearly</button>
+        <button class="dq-btn" onclick="setDq('dq5','no',this)">No — I'm not sure yet</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="run-area">
+    <p>Answer the five questions above, then get your verdict.</p>
+    <button class="btn-run" onclick="runVerdict()">Get My Verdict →</button>
+  </div>
+
+  <div class="verdict-section" id="verdictSection">
+    <div class="verdict-banner" id="verdictBanner">
+      <span class="verdict-icon" id="verdictIcon"></span>
+      <div>
+        <div class="verdict-label" id="verdictLabel"></div>
+        <div class="verdict-text" id="verdictText"></div>
+        <div class="verdict-action" id="verdictAction"></div>
+      </div>
+    </div>
+    <div class="rerun-row">
+      <button class="btn-rerun" onclick="reset()">← Check Another Addition</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const decisions={};
+
+  function toggleGuide(){const b=document.getElementById('guideBody');const a=document.getElementById('guideArrow');b.classList.toggle('open');a.classList.toggle('open');}
+  function handleAdd(el){const has=el.value.trim().length>20;document.getElementById('fb-add').classList.toggle('has-content',has);document.getElementById('add-status').textContent=has?'ready ✓':'empty';}
+  function setDq(id,val,btn){
+    decisions[id]=val;
+    const dq=document.getElementById(id);
+    dq.querySelectorAll('.dq-btn').forEach(b=>{b.classList.remove('selected-yes','selected-no','selected-partial');});
+    btn.classList.add('selected-'+val);
+  }
+
+  function runVerdict(){
+    const addition=document.getElementById('addition').value.trim();
+    if(!addition||addition.length<20){alert('Please write the content you want to add first.');return;}
+    const answered=Object.keys(decisions).length;
+    if(answered<5){alert('Please answer all five questions to get your verdict.');return;}
+
+    const target=document.getElementById('targetFile').value;
+    const d=decisions;
+
+    let verdict,icon,label,text,action;
+
+    if(d.dq3==='yes'||d.dq4==='yes'){
+      verdict='contradiction'; icon='✗'; label='Contradiction — Do Not Add Yet';
+      text=`This addition conflicts with your existing philosophy or non-negotiables.`;
+      if(d.dq3==='yes') action=`<strong>The path forward:</strong> Read your worldview.md "What I Stand For" section. Decide honestly: has your thinking genuinely evolved, or is this a short-term compromise? If it's genuine evolution, update worldview.md first — then add this. If it's a compromise, don't add it.`;
+      else action=`<strong>The path forward:</strong> Open your "What I Will Not Do" sections in worldview.md and brand.md. Either this addition needs to change, or one of your non-negotiables needs to be reconsidered intentionally. Don't let it slip in silently.`;
+    } else if(d.dq1==='no'){
+      verdict='tension'; icon='⚡'; label='Not Ready — Translate First';
+      text=`This addition uses borrowed language that hasn't been made yours yet.`;
+      action=`<strong>The path forward:</strong> Rewrite it in your own words. Ask yourself: what is this framework actually saying, in terms of your own work and your own clients? When you can explain it that way, it's ready to add.`;
+    } else if(d.dq2==='no'){
+      verdict='tension'; icon='⚡'; label='Wrong Layer — Split It';
+      text=`This addition crosses layer boundaries — it contains content that belongs in more than one file.`;
+      action=`<strong>The path forward:</strong> Split it. Identify which part is philosophy (worldview.md), which is identity (brand.md), and which is process (execution.md). Add each piece to the right file separately.`;
+    } else if(d.dq5==='no'){
+      verdict='tension'; icon='⚡'; label='Not Ready — Clarify First';
+      text=`You can't yet explain why this addition belongs in your system.`;
+      action=`<strong>The path forward:</strong> Write the one sentence that explains it before adding it. "This belongs in my system because it extends [specific thing] by doing [specific thing]." If you can't write that sentence, the thinking isn't complete yet.`;
+    } else if(d.dq4==='partial'){
+      verdict='tension'; icon='⚡'; label='Tension — Resolve Before Adding';
+      text=`This addition creates some friction with your non-negotiables. It's not an outright contradiction, but it's close enough to warrant attention.`;
+      action=`<strong>The path forward:</strong> Name the specific friction. Is the addition a refinement that actually aligns, or is it a gradual softening of a line that should hold firm? If it's refinement, add a note in the file explaining the nuance. If it's softening, don't add it.`;
+    } else {
+      verdict='clear'; icon='✓'; label='Clear to Add';
+      text=`This addition is consistent with your existing system. The language is yours, it belongs in the right layer, it doesn't contradict your philosophy or non-negotiables, and you can explain why it belongs.`;
+      action=`<strong>Add it to ${target}.</strong> After adding, re-read the whole file once to make sure the new addition flows naturally with what was already there. If anything now feels outdated alongside it, update or remove it.`;
+    }
+
+    const banner=document.getElementById('verdictBanner');
+    banner.className='verdict-banner '+verdict;
+    document.getElementById('verdictIcon').textContent=icon;
+    document.getElementById('verdictLabel').textContent=label;
+    document.getElementById('verdictText').textContent=text;
+    document.getElementById('verdictAction').innerHTML=action;
+    document.getElementById('verdictSection').classList.add('visible');
+    document.getElementById('verdictSection').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  function reset(){
+    document.getElementById('verdictSection').classList.remove('visible');
+    document.getElementById('addition').value='';
+    document.getElementById('fb-add').classList.remove('has-content');
+    document.getElementById('add-status').textContent='empty';
+    Object.keys(decisions).forEach(k=>delete decisions[k]);
+    document.querySelectorAll('.dq-btn').forEach(b=>b.classList.remove('selected-yes','selected-no','selected-partial'));
+    window.scrollTo({top:document.querySelector('.sdiv').offsetTop-40,behavior:'smooth'});
+  }
+</script>
+</body>
+</html>

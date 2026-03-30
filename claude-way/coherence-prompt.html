@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coherence Check Prompt — Claude Way</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,300;0,400;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0d1117;--surface:#161b22;--border:#2a3340;--accent:#58a6ff;--text:#c9d1d9;--muted:#6a7a8a;--ok:#3fb68a;--serif:'IBM Plex Serif',Georgia,serif;--mono:'IBM Plex Mono',monospace;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--serif);min-height:100vh;}
+  .page{max-width:800px;margin:0 auto;padding:64px 40px 120px;}
+  .back{font-family:var(--mono);font-size:10px;letter-spacing:0.15em;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:8px;margin-bottom:48px;transition:color 0.2s;}
+  .back:hover{color:var(--text);}
+  .badge{font-family:var(--mono);font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);background:rgba(88,166,255,0.1);border:1px solid rgba(88,166,255,0.2);padding:4px 12px;border-radius:2px;display:inline-block;margin-bottom:20px;}
+  h1{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:300;line-height:1.15;letter-spacing:-0.02em;margin-bottom:16px;}
+  h1 em{font-style:italic;color:var(--accent);}
+  .intro{font-size:1rem;color:var(--muted);line-height:1.8;font-style:italic;margin-bottom:40px;}
+  .instructions{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:24px 28px;margin-bottom:32px;}
+  .inst-label{font-family:var(--mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+  .inst-step{display:flex;gap:14px;margin-bottom:10px;font-size:0.9rem;line-height:1.65;}
+  .inst-step:last-child{margin-bottom:0;}
+  .inst-num{font-family:var(--mono);font-size:10px;color:var(--muted);flex-shrink:0;margin-top:3px;}
+  .prompt-block{position:relative;margin-bottom:16px;}
+  .prompt-label{font-family:var(--mono);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+  .prompt-box{background:#080c10;color:#a0c4a0;padding:28px 32px;border-radius:4px;font-family:var(--mono);font-size:0.77rem;line-height:1.85;white-space:pre-wrap;word-break:break-word;border:1px solid var(--border);max-height:400px;overflow-y:auto;}
+  .prompt-box::-webkit-scrollbar{width:4px;}
+  .prompt-box::-webkit-scrollbar-thumb{background:#2a3a4a;border-radius:2px;}
+  .copy-row{display:flex;align-items:center;gap:12px;margin-top:12px;}
+  .btn-copy{font-family:var(--mono);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;padding:9px 20px;cursor:pointer;background:var(--accent);color:#0d1117;border:none;border-radius:2px;font-weight:500;transition:all 0.2s;}
+  .btn-copy:hover{opacity:0.85;}
+  .copy-ok{font-family:var(--mono);font-size:10px;color:var(--ok);letter-spacing:0.1em;opacity:0;transition:opacity 0.3s;}
+  .copy-ok.show{opacity:1;}
+</style>
+</head>
+<body>
+<div class="page">
+  <a class="back" href="index.html">← Back to Claude Way</a>
+  <div class="badge">Prompt 01 — Coherence Check</div>
+  <h1>Read your three files for <em>alignment and contradictions</em></h1>
+  <p class="intro">This prompt sends your three skill files to Claude for a full coherence analysis. Claude reads across all three simultaneously and returns structured findings — what aligns, what creates tension, and what contradicts.</p>
+
+  <div class="instructions">
+    <div class="inst-label">How to use this prompt</div>
+    <div class="inst-step"><span class="inst-num">01</span><span>Copy the prompt below</span></div>
+    <div class="inst-step"><span class="inst-num">02</span><span>Open Claude.ai and start a new conversation</span></div>
+    <div class="inst-step"><span class="inst-num">03</span><span>Paste the prompt, then replace [PASTE WORLDVIEW.MD], [PASTE BRAND.MD], and [PASTE EXECUTION.MD] with the actual contents of your files</span></div>
+    <div class="inst-step"><span class="inst-num">04</span><span>Send and review the report Claude returns</span></div>
+    <div class="inst-step"><span class="inst-num">05</span><span>Update any files that need it, then move to Layer 5</span></div>
+  </div>
+
+  <div class="prompt-block">
+    <div class="prompt-label">Copy this prompt</div>
+    <div class="prompt-box" id="promptBox">You are running a coherence check on a three-layer skill system built by a solopreneur. Read across all three files simultaneously and identify where they align, where they create tension, where they contradict, and where something is implied but missing.
+
+Be direct and honest. This is a diagnostic, not a validation. Do not manufacture positives. If there are contradictions, name them. worldview.md is always the highest authority — if execution.md or brand.md contradicts it, name it clearly.
+
+---
+
+WORLDVIEW.MD:
+[PASTE WORLDVIEW.MD CONTENT HERE]
+
+---
+
+BRAND.MD:
+[PASTE BRAND.MD CONTENT HERE]
+
+---
+
+EXECUTION.MD:
+[PASTE EXECUTION.MD CONTENT HERE]
+
+---
+
+Produce a structured report with clearly labelled findings:
+
+- COHERENT: Where the layers align and reinforce each other. Name specifically what aligns and why it strengthens the system.
+- TENSION: Where two layers pull in slightly different directions. Name exactly which files and exactly what to resolve.
+- CONTRADICTION: Where something directly contradicts another layer. Name the exact conflict. worldview.md is always the authority.
+- GAP: Something implied in one layer but missing or underdeveloped in another. Name what's missing and why it matters.
+
+Include 4-6 findings. At least one of each type if they exist. Reference their actual words, not generic observations.
+
+End with a SYSTEM SUMMARY — a single paragraph in third person that distills the complete picture: who this person is, what they believe, who they serve, how they work, and what makes their approach distinctly theirs. Make it specific enough to use as a bio or an AI context-loader.</div>
+    <div class="copy-row">
+      <button class="btn-copy" onclick="copy()">Copy Prompt</button>
+      <span class="copy-ok" id="copyOk">Copied ✓</span>
+    </div>
+  </div>
+</div>
+<script>
+  function copy(){navigator.clipboard.writeText(document.getElementById('promptBox').textContent).then(()=>{const el=document.getElementById('copyOk');el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500);});}
+</script>
+</body>
+</html>

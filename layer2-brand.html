@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sovereign Mind — Layer 2: Brand</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#0f1523;--paper:#f0f2f5;--surface:#e8ecf2;--border:#cdd4e0;--accent:#2a5caa;--accent-light:#5b85cc;--accent-soft:rgba(42,92,170,0.08);--muted:#6b7a95;--success:#2e7d5e; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font-family:'Playfair Display',Georgia,serif;min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 85% 10%,rgba(42,92,170,0.07) 0%,transparent 50%),radial-gradient(ellipse at 15% 90%,rgba(42,92,170,0.04) 0%,transparent 50%);pointer-events:none;z-index:0;}
+  .container{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:64px 40px 120px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-light));transition:width 0.5s ease;width:0%;}
+  .progress-label{position:fixed;top:14px;right:20px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.12em;z-index:100;}
+  .layer-badge{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:white;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;padding:6px 14px;border-radius:2px;margin-bottom:32px;}
+  .layer-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent-light);}
+  .header{margin-bottom:56px;animation:fadeUp 0.8s ease both;}
+  .header h1{font-size:clamp(2.4rem,5vw,3.6rem);font-weight:400;line-height:1.1;letter-spacing:-0.02em;margin-bottom:20px;}
+  .header h1 em{font-style:italic;color:var(--accent);}
+  .header p{font-size:1.1rem;color:var(--muted);line-height:1.7;font-style:italic;max-width:520px;}
+  .header-rule{width:100%;height:1px;background:linear-gradient(90deg,var(--accent),transparent);margin:32px 0;opacity:0.3;}
+  .name-section{background:white;border:1px solid var(--border);border-radius:4px;padding:28px 32px;margin-bottom:52px;box-shadow:0 2px 16px rgba(42,92,170,0.06);animation:fadeUp 0.8s 0.15s ease both;}
+  .name-section label{display:block;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;}
+  input[type="text"]{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);padding:8px 0;font-family:'Playfair Display',Georgia,serif;font-size:1.4rem;color:var(--ink);outline:none;transition:border-color 0.2s;}
+  input[type="text"]:focus{border-color:var(--accent);}
+  input[type="text"]::placeholder{color:#b0b8c8;font-style:italic;}
+  .section{margin-bottom:52px;animation:fadeUp 0.6s ease both;}
+  .section-header{display:flex;align-items:stretch;gap:0;margin-bottom:24px;}
+  .section-stripe{width:3px;background:var(--accent);border-radius:2px;margin-right:20px;flex-shrink:0;opacity:0.7;}
+  .section-meta{flex:1;}
+  .section-number{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:0.2em;text-transform:uppercase;display:block;margin-bottom:4px;}
+  .section-title{font-size:1.5rem;font-weight:500;color:var(--ink);display:block;margin-bottom:6px;}
+  .section-desc{font-size:0.92rem;color:var(--muted);line-height:1.65;font-style:italic;}
+  .question-block{background:white;border:1px solid var(--border);border-radius:4px;padding:24px 28px;margin-bottom:16px;transition:box-shadow 0.2s,border-color 0.2s;box-shadow:0 1px 8px rgba(42,92,170,0.04);}
+  .question-block:focus-within{border-color:var(--accent-light);box-shadow:0 4px 20px rgba(42,92,170,0.1);}
+  .question-block.answered{border-color:rgba(46,125,94,0.3);}
+  .question-label{font-size:1rem;font-weight:400;line-height:1.5;color:var(--ink);margin-bottom:8px;display:block;}
+  .question-hint{font-size:0.84rem;color:var(--muted);font-style:italic;margin-bottom:12px;display:block;font-family:'DM Mono',monospace;font-size:0.8rem;}
+  textarea{width:100%;background:var(--paper);border:1px solid transparent;border-radius:2px;padding:12px 14px;font-family:'Playfair Display',Georgia,serif;font-size:0.95rem;color:var(--ink);line-height:1.65;resize:vertical;min-height:90px;transition:border-color 0.2s,background 0.2s;outline:none;}
+  textarea:focus{background:white;border-color:var(--border);}
+  textarea::placeholder{color:#a8b4c4;font-style:italic;}
+  .generate-area{text-align:center;padding:52px 0 32px;margin-top:48px;position:relative;}
+  .generate-area::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:60px;height:1px;background:var(--accent);opacity:0.3;}
+  .generate-area p{font-size:1rem;color:var(--muted);margin-bottom:28px;font-style:italic;line-height:1.6;}
+  .btn-generate{background:var(--accent);color:white;border:none;padding:18px 56px;font-family:'Playfair Display',Georgia,serif;font-size:1.05rem;letter-spacing:0.03em;cursor:pointer;transition:all 0.2s;border-radius:2px;box-shadow:0 4px 20px rgba(42,92,170,0.3);}
+  .btn-generate:hover{background:var(--ink);box-shadow:0 6px 24px rgba(15,21,35,0.25);transform:translateY(-2px);}
+  .output-section{display:none;margin-top:64px;animation:fadeUp 0.8s ease both;}
+  .output-section.visible{display:block;}
+  .output-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+  .output-header h2{font-size:1.5rem;font-weight:400;}
+  .output-header h2 em{color:var(--accent);}
+  .output-actions{display:flex;align-items:center;gap:10px;}
+  .btn-copy,.btn-download{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;padding:9px 18px;cursor:pointer;border-radius:2px;transition:all 0.2s;}
+  .btn-copy{background:transparent;color:var(--accent);border:1px solid var(--accent);}
+  .btn-copy:hover{background:var(--accent);color:white;}
+  .btn-download{background:var(--ink);color:white;border:1px solid var(--ink);}
+  .btn-download:hover{background:var(--accent);border-color:var(--accent);}
+  .copy-success{font-family:'DM Mono',monospace;font-size:10px;color:var(--success);letter-spacing:0.1em;opacity:0;transition:opacity 0.3s;}
+  .copy-success.show{opacity:1;}
+  .output-box{background:var(--ink);color:#8fb8e8;padding:36px 40px;border-radius:4px;font-family:'DM Mono',monospace;font-size:0.78rem;line-height:1.85;white-space:pre-wrap;word-break:break-word;max-height:600px;overflow-y:auto;box-shadow:0 8px 40px rgba(15,21,35,0.2);}
+  .output-box::-webkit-scrollbar{width:4px;}
+  .output-box::-webkit-scrollbar-thumb{background:#2a3a5a;border-radius:2px;}
+  .completion-note{margin-top:28px;padding:24px 28px;background:rgba(46,125,94,0.06);border-left:3px solid var(--success);border-radius:2px;}
+  .completion-note p{font-size:0.95rem;color:var(--ink);line-height:1.65;}
+  .completion-note strong{color:var(--success);}
+  .completion-note code{font-family:'DM Mono',monospace;font-size:0.85em;background:rgba(46,125,94,0.1);padding:2px 6px;border-radius:2px;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+  @media(max-width:600px){.container{padding:40px 20px 80px;}}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+<div class="progress-label" id="progressLabel">0 / 11</div>
+<div class="container">
+  <div class="header">
+    <div class="layer-badge">Sovereign Mind System · Layer 2 of 5</div>
+    <h1>Your <em>Brand</em><br>Skill Builder</h1>
+    <div class="header-rule"></div>
+    <p>Your brand is your worldview made visible. This layer captures how your beliefs show up in how you work, communicate, and show up for the people you serve.</p>
+  </div>
+  <div class="name-section">
+    <label>Your Name</label>
+    <input type="text" id="userName" placeholder="e.g. Marcus Webb" oninput="updateProgress()" />
+  </div>
+
+  <div class="section" style="animation-delay:0.1s">
+    <div class="section-header"><div class="section-stripe"></div><div class="section-meta"><span class="section-number">Section 01 — Identity</span><span class="section-title">Who You Are In the World</span><span class="section-desc">Not your job title. The role you actually play in the lives of the people you serve.</span></div></div>
+    <div class="question-block" id="b1"><label class="question-label">1. How do you describe what you do — not your title, but the actual role you play for clients?</label><span class="question-hint">→ Think about the shift you create, not the service you deliver.</span><textarea id="q1" rows="3" placeholder="What I actually do for the people I work with is..." oninput="hi(this,'b1')"></textarea></div>
+    <div class="question-block" id="b2"><label class="question-label">2. Who are you most built to serve? Not a demographic — describe the specific person at the moment they need you most.</label><span class="question-hint">→ The person who gets the most from working with you, at the exact point where they need you.</span><textarea id="q2" rows="3" placeholder="The person I'm most built to serve is someone who..." oninput="hi(this,'b2')"></textarea></div>
+    <div class="question-block" id="b3"><label class="question-label">3. What do you want to be known for — not what you want people to say, but what you want them to feel when they think of you?</label><span class="question-hint">→ The emotional association.</span><textarea id="q3" rows="3" placeholder="When people think of me, I want them to feel..." oninput="hi(this,'b3')"></textarea></div>
+  </div>
+
+  <div class="section" style="animation-delay:0.2s">
+    <div class="section-header"><div class="section-stripe"></div><div class="section-meta"><span class="section-number">Section 02 — Voice</span><span class="section-title">How You Sound When You're Being Yourself</span><span class="section-desc">Not the polished version. The one that shows up when you're most natural and most trusted.</span></div></div>
+    <div class="question-block" id="b4"><label class="question-label">4. How would someone who knows you well describe the way you communicate?</label><span class="question-hint">→ How do you actually talk when explaining something you care about?</span><textarea id="q4" rows="3" placeholder="People who know me well would say I communicate in a way that is..." oninput="hi(this,'b4')"></textarea></div>
+    <div class="question-block" id="b5"><label class="question-label">5. What do you never want your content or communication to sound like?</label><span class="question-hint">→ The tone, the language, the posture that feels like a betrayal of who you are.</span><textarea id="q5" rows="3" placeholder="The voice I never want to inhabit is one that sounds..." oninput="hi(this,'b5')"></textarea></div>
+    <div class="question-block" id="b6"><label class="question-label">6. What topics or ideas do you have natural authority in — things you could talk about for hours?</label><span class="question-hint">→ The territory where your voice has the most energy and depth.</span><textarea id="q6" rows="3" placeholder="The topics I can speak to with real depth are..." oninput="hi(this,'b6')"></textarea></div>
+  </div>
+
+  <div class="section" style="animation-delay:0.3s">
+    <div class="section-header"><div class="section-stripe"></div><div class="section-meta"><span class="section-number">Section 03 — Values in Action</span><span class="section-title">What Your Beliefs Look Like as Behaviour</span><span class="section-desc">Values that stay in your head don't count. What matters is how they show up in how you operate.</span></div></div>
+    <div class="question-block" id="b7"><label class="question-label">7. How do you want clients to feel throughout the experience of working with you — before, during, and after?</label><span class="question-hint">→ The emotional experience of the relationship itself.</span><textarea id="q7" rows="4" placeholder="Before: ... During: ... After: ..." oninput="hi(this,'b7')"></textarea></div>
+    <div class="question-block" id="b8"><label class="question-label">8. What do you do differently from others in your field — the behaviours that make your approach distinctly yours?</label><span class="question-hint">→ Your operational fingerprint.</span><textarea id="q8" rows="4" placeholder="What I do differently from most in my field is..." oninput="hi(this,'b8')"></textarea></div>
+    <div class="question-block" id="b9"><label class="question-label">9. What will you not do, regardless of pressure or opportunity?</label><span class="question-hint">→ The non-negotiables. The lines that don't move.</span><textarea id="q9" rows="4" placeholder="No matter what, I will not..." oninput="hi(this,'b9')"></textarea></div>
+  </div>
+
+  <div class="section" style="animation-delay:0.4s">
+    <div class="section-header"><div class="section-stripe"></div><div class="section-meta"><span class="section-number">Section 04 — Positioning</span><span class="section-title">Where You Stand in the Landscape</span><span class="section-desc">What makes your approach distinctly yours.</span></div></div>
+    <div class="question-block" id="b10"><label class="question-label">10. What do you offer that genuinely can't be found anywhere else — not just a better version, but something qualitatively different?</label><span class="question-hint">→ The thing that makes someone choose you, not just compare you.</span><textarea id="q10" rows="3" placeholder="What people get from me that they can't get anywhere else is..." oninput="hi(this,'b10')"></textarea></div>
+    <div class="question-block" id="b11"><label class="question-label">11. What's the honest promise underneath everything you do?</label><span class="question-hint">→ The thing you'd say if someone asked "why does working with you matter?"</span><textarea id="q11" rows="3" placeholder="The honest promise underneath everything I do is..." oninput="hi(this,'b11')"></textarea></div>
+  </div>
+
+  <div class="generate-area">
+    <p>When you're ready, compile your <code style="font-family:monospace">brand.md</code> skill file.<br>Your exact words are used — nothing is rewritten.</p>
+    <button class="btn-generate" onclick="compileSkill()">Compile My Brand Skill →</button>
+  </div>
+
+  <div class="output-section" id="outputSection">
+    <div class="output-header">
+      <h2>Your <em>brand.md</em> Skill</h2>
+      <div class="output-actions">
+        <button class="btn-copy" onclick="copySkill()">Copy</button>
+        <span class="copy-success" id="copySuccess">Copied ✓</span>
+        <button class="btn-download" onclick="downloadSkill()">Download .md</button>
+      </div>
+    </div>
+    <div class="output-box" id="outputBox"></div>
+    <div class="completion-note">
+      <p><strong>Layer 2 complete.</strong> Save this as <code>brand.md</code> alongside your <code>worldview.md</code>.<br><br>Next: <strong><a href="layer3-execution.html" style="color:var(--success)">Layer 3 — The Execution Skill →</a></strong></p>
+    </div>
+  </div>
+</div>
+<script>
+  const questions=['q1','q2','q3','q4','q5','q6','q7','q8','q9','q10','q11'];
+  let compiled='';
+  function hi(el,bid){document.getElementById(bid).classList.toggle('answered',el.value.trim().length>10);updateProgress();}
+  function updateProgress(){const f=questions.filter(id=>document.getElementById(id).value.trim().length>10).length;document.getElementById('progressFill').style.width=Math.round((f/11)*100)+'%';document.getElementById('progressLabel').textContent=f+' / 11';}
+  function get(id){return document.getElementById(id).value.trim();}
+  function compileSkill(){
+    const name=document.getElementById('userName').value.trim()||'the practitioner';
+    if(questions.filter(id=>get(id).length>10).length<5){alert('Please answer at least 5 questions before compiling.');return;}
+    const slug=name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+    compiled=`---\nname: ${slug}-brand\ndescription: >\n  ${name}'s brand identity, voice, and values in action. Load this for any\n  content creation, client communication, marketing copy, or positioning\n  work. Defines how their philosophy shows up commercially.\n---\n\n# ${name} — Brand Identity & Voice\n\n## The Role I Play\n\n${get('q1')||'[Not answered]'}\n\n${get('q2')||'[Not answered]'}\n\n## How I Want to Be Known\n\n${get('q3')||'[Not answered]'}\n\n## My Voice\n\n${get('q4')||'[Not answered]'}\n\n${get('q5')||'[Not answered]'}\n\n${get('q6')||'[Not answered]'}\n\n## Values in Action\n\n${get('q7')||'[Not answered]'}\n\n${get('q8')||'[Not answered]'}\n\n## What I Will Not Do\n\n${get('q9')||'[Not answered]'}\n\n## My Position\n\n${get('q10')||'[Not answered]'}\n\n${get('q11')||'[Not answered]'}`;
+    document.getElementById('outputBox').textContent=compiled;
+    document.getElementById('outputSection').classList.add('visible');
+    document.getElementById('outputSection').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function copySkill(){navigator.clipboard.writeText(compiled).then(()=>{const el=document.getElementById('copySuccess');el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500);});}
+  function downloadSkill(){const name=document.getElementById('userName').value.trim().replace(/\s+/g,'-').toLowerCase()||'my';const blob=new Blob([compiled],{type:'text/markdown'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`${name}-brand.md`;a.click();URL.revokeObjectURL(url);}
+  updateProgress();
+</script>
+</body>
+</html>

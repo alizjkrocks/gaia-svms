@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sovereign Mind — Layer 5: Workflow</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=Azeret+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0a0f0c;--bg-2:#0f1610;--surface:#131a14;--border:#243020;--border-2:#344030;--green:#4a8c5c;--green-bright:#6ab87a;--green-dim:rgba(74,140,92,0.1);--cream:#dde8d8;--cream-dim:#8a9e84;--muted:#4a5a44;--serif:'Fraunces',Georgia,serif;--mono:'Azeret Mono',monospace;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--cream);font-family:var(--serif);min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 30% 0%,rgba(74,140,92,0.07) 0%,transparent 55%);pointer-events:none;z-index:0;}
+  .page{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:64px 40px 120px;}
+  .progress-bar{position:fixed;top:0;left:0;right:0;height:2px;background:var(--border);z-index:100;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--green-bright));transition:width 0.4s ease;width:0%;}
+  .progress-label{position:fixed;top:12px;right:20px;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:0.1em;z-index:100;}
+  .top-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:56px;padding-bottom:24px;border-bottom:1px solid var(--border);}
+  .nav-logo{font-family:var(--mono);font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--green);}
+  .layer-steps{display:flex;gap:4px;}
+  .lstep{width:20px;height:2px;border-radius:1px;background:var(--border);}
+  .lstep.done{background:var(--green);}
+  .lstep.active{background:var(--green-bright);}
+  .header{margin-bottom:56px;}
+  .header-tag{font-family:var(--mono);font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--green);margin-bottom:24px;display:flex;align-items:center;gap:12px;}
+  .header-tag::before{content:'';width:20px;height:1px;background:var(--green);opacity:0.5;}
+  .header h1{font-size:clamp(2.4rem,5.5vw,4rem);font-weight:300;line-height:1.05;letter-spacing:-0.025em;margin-bottom:20px;}
+  .header h1 em{font-style:italic;color:var(--green-bright);}
+  .header p{font-size:1rem;color:var(--cream-dim);line-height:1.8;font-weight:300;font-style:italic;max-width:580px;}
+  .name-row{display:flex;align-items:center;gap:20px;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:20px 28px;margin-bottom:48px;}
+  .name-row label{font-family:var(--mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--green);white-space:nowrap;flex-shrink:0;}
+  input[type="text"]{flex:1;background:transparent;border:none;border-bottom:1px solid var(--border);padding:6px 0;font-family:var(--serif);font-size:1.1rem;color:var(--cream);outline:none;transition:border-color 0.2s;}
+  input[type="text"]:focus{border-color:var(--green);}
+  input[type="text"]::placeholder{color:var(--muted);font-style:italic;}
+  .section-divider{display:flex;align-items:center;gap:16px;margin:48px 0 32px;}
+  .section-divider span{font-family:var(--mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--green);white-space:nowrap;}
+  .section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+  .q-block{background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:22px 26px;margin-bottom:12px;position:relative;overflow:hidden;transition:border-color 0.25s;}
+  .q-block::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--border);transition:background 0.25s;}
+  .q-block:focus-within::before{background:var(--green);}
+  .q-block.answered::before{background:var(--green-bright);opacity:0.6;}
+  .q-block.answered{border-color:rgba(74,140,92,0.25);}
+  .q-label{font-size:0.98rem;font-weight:400;line-height:1.55;color:var(--cream);margin-bottom:6px;display:block;padding-left:16px;}
+  .q-hint{font-family:var(--mono);font-size:0.75rem;color:var(--cream-dim);margin-bottom:12px;display:block;padding-left:16px;opacity:0.7;}
+  textarea{width:calc(100% - 16px);margin-left:16px;background:var(--bg-2);border:1px solid var(--border);border-radius:2px;padding:12px 14px;font-family:var(--serif);font-size:0.92rem;color:var(--cream);line-height:1.7;resize:vertical;min-height:82px;transition:border-color 0.2s;outline:none;}
+  textarea:focus{border-color:var(--green);}
+  textarea::placeholder{color:var(--muted);font-style:italic;}
+  /* TASK CHECKBOXES */
+  .checkbox-group{padding-left:16px;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;}
+  .checkbox-item{display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 14px;background:var(--bg-2);border:1px solid var(--border);border-radius:2px;transition:all 0.2s;user-select:none;}
+  .checkbox-item:hover{border-color:var(--border-2);}
+  .checkbox-item input[type="checkbox"]{width:14px;height:14px;appearance:none;-webkit-appearance:none;border:1px solid var(--border-2);border-radius:2px;background:var(--bg);flex-shrink:0;cursor:pointer;position:relative;transition:all 0.15s;}
+  .checkbox-item input[type="checkbox"]:checked{background:var(--green);border-color:var(--green);}
+  .checkbox-item input[type="checkbox"]:checked::after{content:'✓';position:absolute;color:var(--bg);font-size:9px;top:50%;left:50%;transform:translate(-50%,-50%);line-height:1;}
+  .checkbox-item.checked{border-color:rgba(74,140,92,0.3);background:var(--green-dim);}
+  .checkbox-label{font-size:0.85rem;color:var(--cream-dim);line-height:1.3;font-family:var(--mono);font-size:0.78rem;}
+  .generate-area{background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:40px;text-align:center;margin-top:32px;}
+  .generate-area p{font-size:0.95rem;color:var(--cream-dim);font-style:italic;line-height:1.75;margin-bottom:28px;max-width:480px;margin-left:auto;margin-right:auto;}
+  .btn-generate{background:var(--green);color:var(--bg);border:none;padding:16px 52px;font-family:var(--mono);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;border-radius:2px;font-weight:500;transition:all 0.25s;box-shadow:0 4px 24px rgba(74,140,92,0.2);}
+  .btn-generate:hover{background:var(--green-bright);transform:translateY(-2px);}
+  .output-section{display:none;margin-top:48px;}
+  .output-section.visible{display:block;}
+  .output-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:12px;}
+  .output-header h2{font-size:1.3rem;font-weight:300;}
+  .output-header h2 em{font-style:italic;color:var(--green-bright);}
+  .output-tabs{display:flex;gap:2px;margin-bottom:20px;background:var(--border);border-radius:3px;overflow:hidden;width:fit-content;}
+  .tab-btn{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;padding:9px 20px;background:var(--surface);color:var(--muted);border:none;cursor:pointer;transition:all 0.2s;}
+  .tab-btn.active{background:var(--green-dim);color:var(--green-bright);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+  .output-actions{display:flex;align-items:center;gap:10px;}
+  .btn-copy,.btn-dl{font-family:var(--mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;padding:8px 16px;cursor:pointer;border-radius:2px;transition:all 0.2s;}
+  .btn-copy{background:transparent;color:var(--green);border:1px solid var(--green);}
+  .btn-copy:hover{background:var(--green);color:var(--bg);}
+  .btn-dl{background:var(--green);color:var(--bg);border:1px solid var(--green);font-weight:500;}
+  .btn-dl:hover{background:var(--green-bright);}
+  .copy-ok{font-family:var(--mono);font-size:10px;color:var(--green-bright);letter-spacing:0.1em;opacity:0;transition:opacity 0.3s;}
+  .copy-ok.show{opacity:1;}
+  .output-box{background:var(--bg-2);color:#a8d4a0;padding:32px 36px;border-radius:3px;font-family:var(--mono);font-size:0.77rem;line-height:1.9;white-space:pre-wrap;word-break:break-word;max-height:560px;overflow-y:auto;border:1px solid var(--border);}
+  .completion-panel{margin-top:28px;background:var(--surface);border:1px solid var(--border);border-radius:3px;overflow:hidden;}
+  .completion-head{padding:16px 24px;background:var(--green-dim);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+  .completion-badge{font-family:var(--mono);font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--green-bright);background:rgba(74,140,92,0.15);border:1px solid rgba(74,140,92,0.3);padding:3px 10px;border-radius:2px;}
+  .completion-body{padding:24px 28px;}
+  .completion-body p{font-size:0.92rem;line-height:1.75;color:var(--cream-dim);margin-bottom:16px;}
+  .completion-body p:last-child{margin-bottom:0;}
+  .completion-body strong{color:var(--cream);font-weight:400;}
+  .completion-body code{font-family:var(--mono);font-size:0.82em;background:var(--green-dim);color:var(--green-bright);padding:2px 7px;border-radius:2px;}
+  .file-list{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:16px 0;}
+  .file-item{font-family:var(--mono);font-size:0.8rem;color:var(--green-bright);background:var(--green-dim);border:1px solid rgba(74,140,92,0.2);padding:8px 14px;border-radius:2px;display:flex;align-items:center;gap:8px;}
+  .file-item::before{content:'✓';opacity:0.7;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+  @media(max-width:600px){.page{padding:40px 20px 80px;}.checkbox-group{grid-template-columns:1fr;}.file-list{grid-template-columns:1fr;}.output-box{font-size:0.7rem;padding:20px;}textarea{width:100%;margin-left:0;}.q-label,.q-hint{padding-left:0;}}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+<div class="progress-label" id="progressLabel">0 / 8</div>
+<div class="page">
+  <div class="top-nav">
+    <span class="nav-logo">Sovereign Mind System</span>
+    <div class="layer-steps">
+      <div class="lstep done"></div><div class="lstep done"></div><div class="lstep done"></div><div class="lstep done"></div><div class="lstep active"></div>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="header-tag">Layer 5 of 5 · The Final Layer</div>
+    <h1>Your <em>Workflow</em><br>Routing System</h1>
+    <p>You've built what you believe, who you are, and how you work. Now we map how your AI moves between all three — so it knows exactly which layer to check first, depending on what you're doing.</p>
+  </div>
+
+  <div class="name-row">
+    <label>Your Name</label>
+    <input type="text" id="userName" placeholder="e.g. Elena Vasquez" oninput="updateProgress()" />
+  </div>
+
+  <div class="section-divider"><span>Your Workflow</span></div>
+
+  <div class="q-block" id="b-tasks">
+    <label class="q-label">1. What do you use AI for most in your work? Select everything that applies.</label>
+    <span class="q-hint">→ Check all that are a regular part of how you work.</span>
+    <div class="checkbox-group" id="taskTypes">
+      <label class="checkbox-item" onclick="toggleCb(this)"><input type="checkbox" value="Writing content (posts, articles, newsletters)"><span class="checkbox-label">Writing content</span></label>
+      <label class="checkbox-item" onclick="toggleCb(this)"><input type="checkbox" value="Drafting emails or client communication"><span class="checkbox-label">Emails & client comms</span></label>
+      <label class="checkbox-item" onclick="toggleCb(this)"><input type="checkbox" value="Strategy and planning"><span class="checkbox-label">Strategy & planning</span></label>
+      <label class="checkbox-item" onclick="toggleCb(this)"><input type="checkbox" value="Client coaching or advisory work"><span class="checkbox-label">Coaching & advisory</span></label>
+      <label class="checkbox-item" onclick="toggleCb(this)"><input type="checkbox" value="Research and synthesis"><span class="checkbox-label">Research & synthesis</span></label>
+      <label class="checkbox-item" onclick="toggleCb(this)"><input type="checkbox" value="Sales and marketing copy"><span class="checkbox-label">Sales & marketing copy</span></label>
+      <label class="checkbox-item" onclick="toggleCb(this)"><input type="checkbox" value="Product or curriculum development"><span class="checkbox-label">Product development</span></label>
+      <label class="checkbox-item" onclick="toggleCb(this)"><input type="checkbox" value="Editing and refining my own writing"><span class="checkbox-label">Editing my writing</span></label>
+    </div>
+  </div>
+
+  <div class="q-block" id="b2"><label class="q-label">2. Which task has the highest cost if AI gets it wrong?</label><span class="q-hint">→ The task where you're most particular.</span><textarea id="q2" rows="2" placeholder="The task where getting it wrong costs most is..." oninput="hi(this,'b2')"></textarea></div>
+  <div class="q-block" id="b3"><label class="q-label">3. Walk me through a typical AI working session. What do you do first? What happens next?</label><span class="q-hint">→ Not the ideal version — the actual one.</span><textarea id="q3" rows="4" placeholder="Typically I start by... then I..." oninput="hi(this,'b3')"></textarea></div>
+  <div class="q-block" id="b4"><label class="q-label">4. When AI output disappoints you, what's usually wrong with it?</label><span class="q-hint">→ Too generic? Wrong tone? Contradicts your values? Name the actual failure.</span><textarea id="q4" rows="3" placeholder="When I'm disappointed, it's usually because..." oninput="hi(this,'b4')"></textarea></div>
+  <div class="q-block" id="b5"><label class="q-label">5. If you could only give AI one thing to know before any task — what is it?</label><span class="q-hint">→ The single most important piece of context.</span><textarea id="q5" rows="2" placeholder="The one thing AI always needs to know is..." oninput="hi(this,'b5')"></textarea></div>
+  <div class="q-block" id="b6"><label class="q-label">6. Before you publish or send anything AI helped with — what do you check for?</label><span class="q-hint">→ Your personal quality gate.</span><textarea id="q6" rows="3" placeholder="Before I publish, I always check whether..." oninput="hi(this,'b6')"></textarea></div>
+  <div class="q-block" id="b7"><label class="q-label">7. When do you override AI and write it yourself? What's the signal?</label><span class="q-hint">→ The line between what AI can help with and what only you can produce.</span><textarea id="q7" rows="3" placeholder="I write it myself when..." oninput="hi(this,'b7')"></textarea></div>
+  <div class="q-block" id="b8"><label class="q-label">8. Describe what a perfect AI working session looks like for you.</label><span class="q-hint">→ The benchmark every session should be measured against.</span><textarea id="q8" rows="4" placeholder="The ideal session would look like this..." oninput="hi(this,'b8')"></textarea></div>
+
+  <div class="generate-area">
+    <p>Your answers will be assembled into a <code style="font-family:monospace">system.md</code> routing file plus annotations to add to each of your existing skill files.</p>
+    <button class="btn-generate" onclick="compile()">Build My Routing System →</button>
+  </div>
+
+  <div class="output-section" id="outputSection">
+    <div class="output-header">
+      <h2>Your <em>system.md</em> Routing OS</h2>
+      <div class="output-actions">
+        <button class="btn-copy" onclick="copyOutput()">Copy</button>
+        <span class="copy-ok" id="copyOk">Copied ✓</span>
+        <button class="btn-dl" onclick="downloadOutput()">Download .md</button>
+      </div>
+    </div>
+    <div class="output-tabs">
+      <button class="tab-btn active" id="tab-sys-btn" onclick="switchTab('sys')">system.md</button>
+      <button class="tab-btn" id="tab-ann-btn" onclick="switchTab('ann')">File Annotations</button>
+    </div>
+    <div class="tab-panel active" id="tab-sys"><div class="output-box" id="sysBox"></div></div>
+    <div class="tab-panel" id="tab-ann"><div class="output-box" id="annBox"></div></div>
+    <div class="completion-panel">
+      <div class="completion-head"><span class="completion-badge">✓ Sovereign Mind System Complete</span><span style="font-size:0.95rem;color:var(--cream)">All five layers built</span></div>
+      <div class="completion-body">
+        <p>Your complete system is four files. Keep them in one folder and load them together at the start of any AI session.</p>
+        <div class="file-list"><div class="file-item">worldview.md</div><div class="file-item">brand.md</div><div class="file-item">execution.md</div><div class="file-item">system.md</div></div>
+        <p>The <strong>File Annotations tab</strong> shows short additions to paste into the bottom of each of your three existing files. They add routing instructions that tell your AI which file to consult and when.</p>
+        <p><strong>Want AI to do the heavy lifting?</strong> Open the <a href="claude-way/index.html" style="color:var(--green-bright)">Claude Way folder</a> for prompt files that let Claude run the coherence check, workflow analysis, and update checker on your behalf — no extra tools needed.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const qIds=['q2','q3','q4','q5','q6','q7','q8'];
+  let activeTab='sys';
+  let sysOut='';
+  let annOut='';
+
+  function toggleCb(label){const cb=label.querySelector('input');setTimeout(()=>{label.classList.toggle('checked',cb.checked);updateProgress();},0);}
+  function hi(el,bid){document.getElementById(bid).classList.toggle('answered',el.value.trim().length>10);updateProgress();}
+  function get(id){const el=document.getElementById(id);return el?el.value.trim():'';}
+  function getTasks(){return Array.from(document.querySelectorAll('#taskTypes input:checked')).map(cb=>cb.value);}
+
+  function updateProgress(){
+    const tasks=getTasks().length>0?1:0;
+    const qf=qIds.filter(id=>get(id).length>10).length;
+    const total=tasks+qf;
+    document.getElementById('progressFill').style.width=Math.round((total/8)*100)+'%';
+    document.getElementById('progressLabel').textContent=total+' / 8';
+  }
+
+  function switchTab(t){
+    activeTab=t;
+    ['sys','ann'].forEach(tab=>{
+      document.getElementById('tab-'+tab+'-btn').classList.toggle('active',tab===t);
+      document.getElementById('tab-'+tab).classList.toggle('active',tab===t);
+    });
+  }
+
+  function compile(){
+    const name=document.getElementById('userName').value.trim()||'the practitioner';
+    const tasks=getTasks();
+    if(tasks.length===0||!get('q3')){alert('Please select your task types and describe a typical session before compiling.');return;}
+    const slug=name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+
+    const routingRules=tasks.map(t=>`**${t}**\n→ Load first: worldview.md (check philosophical alignment)\n→ Cross-check: brand.md (verify voice and positioning)\n→ Quality gate: ${get('q6')||'Review before delivering'}\n→ Override: ${get('q7')||'When personal voice is the signal'}`).join('\n\n');
+
+    sysOut=`---\nname: ${slug}-system\ndescription: >\n  ${name}'s master routing OS. Load this alongside worldview.md, brand.md,\n  and execution.md at the start of every session. Contains task-specific\n  routing rules, quality gates, and override conditions. worldview.md is\n  always the authority — if any output contradicts it, stop and flag it.\n---\n\n# ${name} — System Routing OS\n\n## How to Load This System\n\nAt the start of any working session, load all four files: worldview.md, brand.md, execution.md, system.md. worldview.md overrides all others. If output contradicts it, stop and flag before proceeding.\n\nThe most important thing I need AI to know before any task:\n${get('q5')||'[Not answered]'}\n\n## Task Routing Rules\n\n${routingRules}\n\n## My Quality Standards\n\n${get('q6')||'[Not answered]'}\n\nHighest-cost task — apply extra care:\n${get('q2')||'[Not answered]'}\n\n## My Override Conditions\n\nI write it myself when:\n${get('q7')||'[Not answered]'}\n\n## Typical Working Session\n\n${get('q3')||'[Not answered]'}\n\n## When AI Disappoints Me\n\n${get('q4')||'[Not answered]'}\n\n## The Benchmark Session\n\n${get('q8')||'[Not answered]'}`;
+
+    annOut=`--- ADD TO THE BOTTOM OF worldview.md ---\n\n## Routing Instructions\n\n- Load this file first before any task that involves communicating with an audience, defining a strategy, or advising a client\n- If any output contradicts this file, it is wrong — flag and revise before delivering\n- This file is the highest authority. When brand.md or execution.md conflicts with it, this file wins\n- Trigger: any content creation, any positioning decision, any client-facing communication\n\n\n--- ADD TO THE BOTTOM OF brand.md ---\n\n## Routing Instructions\n\n- Load after worldview.md for any task involving writing, communication, or client interaction\n- Check voice and tone of all AI output against this file before delivering\n- If output sounds generic, too polished, or unlike the voice described here — reject and revise\n- Trigger: writing content, drafting emails, any client-facing work, positioning decisions\n\n\n--- ADD TO THE BOTTOM OF execution.md ---\n\n## Routing Instructions\n\n- Load for any task involving process, methodology, content creation, or delivery\n- The essential first step described above must be acknowledged before any draft is produced\n- The quality standard above is the minimum threshold — do not deliver below it\n- When uncertain about approach, return to worldview.md before proceeding\n- Trigger: ${tasks.slice(0,3).join(', ')||'all tasks'}`;
+
+    document.getElementById('sysBox').textContent=sysOut;
+    document.getElementById('annBox').textContent=annOut;
+    document.getElementById('outputSection').classList.add('visible');
+    document.getElementById('outputSection').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  function copyOutput(){const text=activeTab==='sys'?sysOut:annOut;navigator.clipboard.writeText(text).then(()=>{const el=document.getElementById('copyOk');el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500);});}
+
+  function downloadOutput(){
+    const name=document.getElementById('userName').value.trim().replace(/\s+/g,'-').toLowerCase()||'my';
+    const text=activeTab==='sys'?sysOut:annOut;
+    const fn=activeTab==='sys'?`${name}-system.md`:`${name}-routing-annotations.md`;
+    const blob=new Blob([text],{type:'text/markdown'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download=fn;a.click();URL.revokeObjectURL(url);
+  }
+
+  updateProgress();
+</script>
+</body>
+</html>

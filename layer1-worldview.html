@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sovereign Mind — Layer 1: Worldview</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1410;
+    --parchment: #f5f0e8;
+    --warm-mid: #e8dfc8;
+    --accent: #8b4513;
+    --accent-light: #c4845a;
+    --muted: #8a7a6a;
+    --border: #d4c8b0;
+    --success: #4a7c59;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--parchment); color: var(--ink); font-family: 'Cormorant Garamond', Georgia, serif; min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse at 20% 20%, rgba(139,69,19,0.06) 0%, transparent 60%), radial-gradient(ellipse at 80% 80%, rgba(139,69,19,0.04) 0%, transparent 60%); pointer-events: none; z-index: 0; }
+  .grain { position: fixed; inset: 0; opacity: 0.03; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
+  .container { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 60px 40px 120px; }
+  .progress-bar { position: fixed; top: 0; left: 0; right: 0; height: 2px; background: var(--border); z-index: 100; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-light)); transition: width 0.5s ease; width: 0%; }
+  .progress-label { position: fixed; top: 12px; right: 20px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.1em; z-index: 100; }
+  .header { text-align: center; margin-bottom: 64px; animation: fadeUp 0.8s ease both; }
+  .header .eyebrow { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  .header h1 { font-size: clamp(2.2rem, 5vw, 3.2rem); font-weight: 300; letter-spacing: -0.01em; line-height: 1.15; margin-bottom: 20px; }
+  .header h1 em { font-style: italic; color: var(--accent); }
+  .header p { font-size: 1.15rem; font-weight: 300; color: var(--muted); line-height: 1.7; max-width: 540px; margin: 0 auto; }
+  .divider { width: 48px; height: 1px; background: var(--accent); margin: 28px auto; opacity: 0.5; }
+  .name-section { background: rgba(255,255,255,0.4); border: 1px solid var(--border); border-radius: 2px; padding: 28px 32px; margin-bottom: 48px; animation: fadeUp 0.8s 0.2s ease both; }
+  .name-section label { display: block; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+  input[type="text"] { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border); padding: 8px 0; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.3rem; color: var(--ink); outline: none; transition: border-color 0.2s; }
+  input[type="text"]:focus { border-color: var(--accent); }
+  input[type="text"]::placeholder { color: #c0b0a0; font-style: italic; }
+  .section { margin-bottom: 56px; animation: fadeUp 0.6s ease both; }
+  .section-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 8px; }
+  .section-number { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); letter-spacing: 0.1em; flex-shrink: 0; }
+  .section-title { font-size: 1.4rem; font-weight: 400; }
+  .section-desc { font-size: 0.95rem; color: var(--muted); line-height: 1.65; margin-bottom: 28px; padding-left: 52px; font-style: italic; }
+  .question-block { margin-bottom: 28px; padding-left: 52px; }
+  .question-label { font-size: 1.05rem; font-weight: 400; line-height: 1.5; color: var(--ink); margin-bottom: 10px; display: block; }
+  .question-hint { font-size: 0.85rem; color: var(--muted); font-style: italic; margin-bottom: 10px; display: block; }
+  textarea { width: 100%; background: rgba(255,255,255,0.5); border: 1px solid var(--border); border-radius: 2px; padding: 14px 16px; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1rem; color: var(--ink); line-height: 1.65; resize: vertical; min-height: 100px; transition: border-color 0.2s, background 0.2s, box-shadow 0.2s; outline: none; }
+  textarea:focus { border-color: var(--accent); background: rgba(255,255,255,0.8); box-shadow: 0 0 0 3px rgba(139,69,19,0.06); }
+  textarea::placeholder { color: #b8a898; font-style: italic; }
+  textarea.filled { border-color: rgba(74,124,89,0.4); background: rgba(255,255,255,0.6); }
+  .generate-area { text-align: center; padding: 48px 0 32px; border-top: 1px solid var(--border); margin-top: 48px; }
+  .generate-area p { font-size: 1rem; color: var(--muted); margin-bottom: 24px; font-style: italic; line-height: 1.6; }
+  .btn-generate { background: var(--ink); color: var(--parchment); border: none; padding: 16px 48px; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.1rem; letter-spacing: 0.05em; cursor: pointer; transition: background 0.2s, transform 0.15s; border-radius: 1px; }
+  .btn-generate:hover { background: var(--accent); transform: translateY(-1px); }
+  .output-section { display: none; margin-top: 64px; animation: fadeUp 0.8s ease both; }
+  .output-section.visible { display: block; }
+  .output-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+  .output-header h2 { font-size: 1.4rem; font-weight: 400; }
+  .output-actions { display: flex; gap: 12px; }
+  .btn-copy, .btn-download { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; padding: 8px 18px; cursor: pointer; border-radius: 1px; transition: all 0.2s; }
+  .btn-copy { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .btn-copy:hover { background: var(--accent); color: white; }
+  .btn-download { background: var(--accent); color: white; border: 1px solid var(--accent); }
+  .btn-download:hover { background: var(--ink); border-color: var(--ink); }
+  .copy-success { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--success); letter-spacing: 0.1em; margin-left: 8px; opacity: 0; transition: opacity 0.3s; }
+  .copy-success.show { opacity: 1; }
+  .output-box { background: var(--ink); color: #d4c8a8; padding: 32px 36px; border-radius: 2px; font-family: 'DM Mono', monospace; font-size: 0.8rem; line-height: 1.8; white-space: pre-wrap; word-break: break-word; max-height: 600px; overflow-y: auto; }
+  .output-box::-webkit-scrollbar { width: 4px; }
+  .output-box::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 2px; }
+  .completion-note { margin-top: 32px; padding: 24px 28px; background: rgba(74,124,89,0.06); border-left: 2px solid var(--success); border-radius: 1px; }
+  .completion-note p { font-size: 0.95rem; color: var(--ink); line-height: 1.6; }
+  .completion-note strong { color: var(--success); }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @media (max-width: 600px) { .container { padding: 40px 24px 80px; } .question-block { padding-left: 0; } .section-desc { padding-left: 0; } }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+<div class="progress-label" id="progressLabel">0 / 12</div>
+<div class="container">
+  <div class="header">
+    <div class="eyebrow">Sovereign Mind System · Layer 1 of 5</div>
+    <h1>Your <em>Worldview</em><br>Skill Builder</h1>
+    <div class="divider"></div>
+    <p>Answer honestly. Don't edit yourself as you go. This is a thinking exercise — the document comes after.</p>
+  </div>
+  <div class="name-section">
+    <label>Your Name</label>
+    <input type="text" id="userName" placeholder="e.g. Sarah Chen" oninput="updateProgress()" />
+  </div>
+
+  <div class="section" style="animation-delay:0.1s">
+    <div class="section-header"><span class="section-number">01 —</span><span class="section-title">The Problem You Solve</span></div>
+    <p class="section-desc">Not the surface problem — the real one underneath it.</p>
+    <div class="question-block">
+      <label class="question-label">1. What is the real problem your clients have — beneath the one they think they have?</label>
+      <span class="question-hint">Go one level deeper than the obvious answer.</span>
+      <textarea id="q1" rows="4" placeholder="The real problem underneath is..." oninput="handleInput(this)"></textarea>
+    </div>
+    <div class="question-block">
+      <label class="question-label">2. What does your industry get wrong about this problem? What's the common approach that fails, and why?</label>
+      <span class="question-hint">What do most practitioners miss that you've learned to see?</span>
+      <textarea id="q2" rows="4" placeholder="The common approach fails because..." oninput="handleInput(this)"></textarea>
+    </div>
+    <div class="question-block">
+      <label class="question-label">3. What do your best clients understand by the end of working with you that they didn't at the beginning?</label>
+      <span class="question-hint">The shift in perspective, not just the skill or result.</span>
+      <textarea id="q3" rows="4" placeholder="By the end, they understand that..." oninput="handleInput(this)"></textarea>
+    </div>
+  </div>
+
+  <div class="section" style="animation-delay:0.2s">
+    <div class="section-header"><span class="section-number">02 —</span><span class="section-title">What You Believe About People</span></div>
+    <p class="section-desc">Your convictions about human capacity and what real change requires.</p>
+    <div class="question-block">
+      <label class="question-label">4. What do you believe about the people you serve — their capacity, their potential — that most in your field would find surprising?</label>
+      <span class="question-hint">The belief that makes you see your clients differently.</span>
+      <textarea id="q4" rows="4" placeholder="I believe my clients are capable of..." oninput="handleInput(this)"></textarea>
+    </div>
+    <div class="question-block">
+      <label class="question-label">5. When a client is stuck, what is actually happening? Not the surface story — the real reason.</label>
+      <span class="question-hint">Strip away the presenting excuse. What's the pattern underneath?</span>
+      <textarea id="q5" rows="4" placeholder="When someone is stuck, what's really happening is..." oninput="handleInput(this)"></textarea>
+    </div>
+    <div class="question-block">
+      <label class="question-label">6. What does real growth or transformation actually require? What's the thing most people skip?</label>
+      <span class="question-hint">The uncomfortable truth about change you've learned to say plainly.</span>
+      <textarea id="q6" rows="4" placeholder="Real change requires..." oninput="handleInput(this)"></textarea>
+    </div>
+  </div>
+
+  <div class="section" style="animation-delay:0.3s">
+    <div class="section-header"><span class="section-number">03 —</span><span class="section-title">Your Own Perspective</span></div>
+    <p class="section-desc">Where your convictions came from, and what you'd defend even at cost.</p>
+    <div class="question-block">
+      <label class="question-label">7. What have you learned — through experience, failure, or observation — that fundamentally changed how you see your work?</label>
+      <span class="question-hint">The turning point. What did you have to unlearn?</span>
+      <textarea id="q7" rows="4" placeholder="The thing that changed everything for me was..." oninput="handleInput(this)"></textarea>
+    </div>
+    <div class="question-block">
+      <label class="question-label">8. What do you believe so strongly that you'd be willing to lose clients over it?</label>
+      <span class="question-hint">This is the hardest question. The answer is your philosophical core.</span>
+      <textarea id="q8" rows="4" placeholder="I believe strongly enough to lose clients over..." oninput="handleInput(this)"></textarea>
+    </div>
+    <div class="question-block">
+      <label class="question-label">9. If someone asked "what do you actually stand for?" — what's the honest answer?</label>
+      <span class="question-hint">One idea. Plain language. No jargon.</span>
+      <textarea id="q9" rows="3" placeholder="At the centre of everything I do..." oninput="handleInput(this)"></textarea>
+    </div>
+  </div>
+
+  <div class="section" style="animation-delay:0.4s">
+    <div class="section-header"><span class="section-number">04 —</span><span class="section-title">The World Your Work Exists In</span></div>
+    <p class="section-desc">How you see the relationship with your clients and what you're building toward.</p>
+    <div class="question-block">
+      <label class="question-label">10. What's changing in your field right now that most people aren't paying enough attention to?</label>
+      <span class="question-hint">The shift you can see that others are still missing.</span>
+      <textarea id="q10" rows="4" placeholder="What most people are missing right now is..." oninput="handleInput(this)"></textarea>
+    </div>
+    <div class="question-block">
+      <label class="question-label">11. What kind of relationship do you believe should exist between you and the people you serve?</label>
+      <span class="question-hint">How do you want clients to feel in relationship with you and your work?</span>
+      <textarea id="q11" rows="4" placeholder="The relationship I want to create is one where..." oninput="handleInput(this)"></textarea>
+    </div>
+    <div class="question-block">
+      <label class="question-label">12. What does success look like for your clients — not the metric, but the lived experience?</label>
+      <span class="question-hint">Paint the after-state. What does life feel like for them?</span>
+      <textarea id="q12" rows="4" placeholder="I know my work has done its job when..." oninput="handleInput(this)"></textarea>
+    </div>
+  </div>
+
+  <div class="generate-area">
+    <p>When you're ready, compile your <code style="font-family:monospace">worldview.md</code> skill file.<br>Your exact words are used — nothing is changed or rewritten.</p>
+    <button class="btn-generate" onclick="compileSkill()">Compile My Worldview Skill →</button>
+  </div>
+
+  <div class="output-section" id="outputSection">
+    <div class="output-header">
+      <h2>Your <em>worldview.md</em> Skill</h2>
+      <div class="output-actions">
+        <button class="btn-copy" onclick="copySkill()">Copy</button>
+        <span class="copy-success" id="copySuccess">Copied ✓</span>
+        <button class="btn-download" onclick="downloadSkill()">Download .md</button>
+      </div>
+    </div>
+    <div class="output-box" id="outputBox"></div>
+    <div class="completion-note">
+      <p><strong>Layer 1 complete.</strong> Save this file as <code>worldview.md</code>. Keep it somewhere you can find it — you'll need it for the coherence check in Layer 4.<br><br>Next: <strong><a href="layer2-brand.html" style="color:var(--success)">Layer 2 — The Brand Skill →</a></strong></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const questions = ['q1','q2','q3','q4','q5','q6','q7','q8','q9','q10','q11','q12'];
+  let compiled = '';
+
+  function handleInput(el) {
+    el.classList.toggle('filled', el.value.trim().length > 10);
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const filled = questions.filter(id => document.getElementById(id).value.trim().length > 10).length;
+    document.getElementById('progressFill').style.width = Math.round((filled/12)*100) + '%';
+    document.getElementById('progressLabel').textContent = filled + ' / 12';
+  }
+
+  function get(id) { return document.getElementById(id).value.trim(); }
+
+  function compileSkill() {
+    const name = document.getElementById('userName').value.trim() || 'the practitioner';
+    const filled = questions.filter(id => get(id).length > 10).length;
+    if (filled < 6) { alert('Please answer at least 6 questions before compiling your skill file.'); return; }
+
+    const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+
+    compiled = `---
+name: ${slug}-worldview
+description: >
+  ${name}'s core philosophy and beliefs. Load this before any task involving
+  content creation, strategy, client communication, or product development.
+  This is the philosophical root — it is the highest authority and overrides
+  all other layers if contradictions arise.
+---
+
+# ${name} — Worldview & Philosophy
+
+## The Real Problem I Solve
+
+${get('q1') || '[Not answered]'}
+
+${get('q2') || '[Not answered]'}
+
+${get('q3') || '[Not answered]'}
+
+## What I Believe About People
+
+${get('q4') || '[Not answered]'}
+
+${get('q5') || '[Not answered]'}
+
+${get('q6') || '[Not answered]'}
+
+## What Shaped This Perspective
+
+${get('q7') || '[Not answered]'}
+
+## What I Stand For
+
+${get('q8') || '[Not answered]'}
+
+${get('q9') || '[Not answered]'}
+
+## What I Will Not Do
+
+[Review your answers above and list 3–5 hard lines — approaches, tactics, or compromises that contradict everything you've written here. Add them as bullet points.]
+
+## The World I'm Working Toward
+
+${get('q10') || '[Not answered]'}
+
+${get('q11') || '[Not answered]'}
+
+${get('q12') || '[Not answered]'}`;
+
+    document.getElementById('outputBox').textContent = compiled;
+    document.getElementById('outputSection').classList.add('visible');
+    document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function copySkill() {
+    navigator.clipboard.writeText(compiled).then(() => {
+      const el = document.getElementById('copySuccess');
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2500);
+    });
+  }
+
+  function downloadSkill() {
+    const name = document.getElementById('userName').value.trim().replace(/\s+/g,'-').toLowerCase() || 'my';
+    const blob = new Blob([compiled], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `${name}-worldview.md`; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  updateProgress();
+</script>
+</body>
+</html>
